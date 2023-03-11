@@ -1,94 +1,121 @@
+#!/usr/bin/env python3
+# -*- coding:utf-8 -*-
 """ Codififador Huffman """
 # Implementar el codificador y decodificador Huffman y Shannon-Fano donde cada 
 # símbolo a codificar desde un archivo en binario es de 16 bits,
-
+# a
 # Implementar codificador y decodificador Lempel-Ziv con símbolos de longitud
 # fija de 16 bits.
+
+
 
 # from collections.OrderedDict
 # TODO: importar arbol binario y lista o diccionario ordenado
 # from collections import OrderedDict
-# TODO importar parser
-# TODO medir mis tiempos
-import heapq
+#from estructuras import *
+
 import argparse
+import heapq
+import os
 import time
 
 from queue import PriorityQueue
+from common import Compression, pickle_dict
 
+class Huffman:
 
-#from estructuras import *
+    class Node:
+        """clase anidada: Nodo..."""
+        def __init__(self, symbol, freq):
+            self.symbol = symbol
+            self.freq = freq
+            self.left = None
+            self.right = None
 
+        def __lt__(self, other: object) -> bool:
+            if not isinstance(other, type(self)):
+               raise TypeError(f"El objeto {other} tiene que ser de tipo Node.") # 'other must be proper Position type'
+            return self.freq < other.freq
+        
+        def __eq__(self, other: object) -> bool:
+            if not isinstance(other, type(self)):
+               raise TypeError(f"El objeto {other} tiene que ser de tipo Node.") # 'other must be proper Position type'
+            return self.freq == other.freq
+            
 
-# TODO: pasar a clase con metodos estaticos
+    def __init__(self, path: str) -> None:
+        self.path = path
+        self.fn , self.ext = os.path.splitext(self.path)
+        self.freq = {}
+        self.total_8 = 0
+        self.total_16 = 0
+        self.prob = PriorityQueue() # {} # var si alamccenar tuplas (v: k)
+        self.heap = []
+        self.code = {}
+        self.reverse_map = {}
+        
+    def compress(self):
+        """Hace la compresión"""
+        self.__read_input()
+        self.__heap()
 
-def snf():
-    """ pass """
-    pass
+    def __read_input(self):
+        """Lee el archivo, cuenta las frecuencias de parejas debytes (2 hex),
+        uenta cuantos bytes tiene el archivo, y cuantas parejas de bytes
+        """
+        holder = None
+        symbol = None
 
+        # forma el diccionario de frecuencias
+        with open(self.path, "rb") as file:
+            for byte_ in file.read():
+                self.total_8 += 1
+                if self.total_8 % 2 != 0:
+                    holder = hex(byte_)
+                    continue
+                symbol = holder + "\\" + hex(byte_)
+                if not symbol in self.freq:
+                    self.freq[symbol] = 0
+                self.freq[symbol] += 1
+                self.total_16 += 1
+                # # DEBUG: ----------------------------------------------------
+                # if self.total_16 == 1:
+                #     print(f"el primer simbolo es: {symbol}")
+                # # DEBUG(FIN) ------------------------------------------------
 
-def huff():
-    """ pass """
-    pass
+        # verifica que no se omitiera un simbolo
+        # le agrega paddin de ser necesario
+        if self.total_8 % 2 != 0:
+            symbol = holder + "\\" + hex(0)
+            if not symbol in self.freq:
+                self.freq[symbol] = 0
+            self.freq[symbol] += 1
+            self.total_16 += 1
+        # # DEBUG: ------------------------------------------------------------
+        # print(f"el último síbolo es: {symbol}")
+        # # DEBUG(FIN) --------------------------------------------------------
 
+    def _print_freq(self):
+        """IMprime el diccionario de frecuencias, para uso de debug"""
+        print("FREQ DICT:")
+        for k, v in self.freq.items():
+            print(k, ":", v)
 
-def lpz():
-    """ pass """
-    pass
+    def __heap(self) -> None:
+        """Forma el monticulo (heap)"""
+        for key, value in self.freq.items():
+            node = self.Node(key, value)
+            heapq.heappush(self.heap, node)
 
+    def _print_heap(self):
+        for i in self.heap:
+            print(i.symbol, ":", i.freq)
 
-def encode():
-    """ pass """
-    pass
+    # def __probability(self):
+    #     self.prob = {key: value / self.total_16 for key, value in self.freq.items()}
 
-
-def decode():
-    """ pass """
-    pass
-
-
-def read_input(file_name: str) -> dict:
-    """ Lee el archivo, cada 8 bits """
-
-    counter = {}
-    total = 0
-    keeper = None
-    symbol = None
-    with open(file_name, "rb") as file:
-        for item in file.read():
-            total += 1
-            if total % 2 != 0:
-                keeper = hex(item)
-                continue
-            symbol = keeper + "\\" + hex(item)
-            try:
-                counter[symbol] += 1
-            except KeyError:
-                counter[symbol] = 0
-                counter[symbol] += 1
-
-            # # DEBUG: --------------------------------------------------------
-            # if total <= 2:  # <- el primero
-            #     print("el primer simbolo es: ", symbol)
-            # # ---------------------------------------------------------------
-
-    if total % 2 != 0:
-        symbol = keeper + "\\" + hex(0)
-        try:
-            counter[symbol] += 1
-        except KeyError:
-            counter[symbol] = 0
-            counter[symbol] += 1
-
-    # # DEBUG: ----------------------------------------------------------------
-    # print("el último síbolo es: ", symbol)  # <- el último
-    # print("DICT:")
-    # for k, v in counter.items():
-    #     print(k, ":", v)
-    # # -----------------------------------------------------------------------
-
-    prob = {key: value / total for key, value in counter.items()}
-    return prob
+    # para ordenar 
+    #input_ = dict(sorted(input_.items(), key=lambda word: word[1], reverse=True))
 
 def arguments_parser():
     """Resive el nombre del archivo a comprimir como argumento desde la línea 
@@ -113,16 +140,9 @@ def main():
     # args = arguments_parser()
     # input_file = str(args.file_name)
 
-    input_ = read_input(input_file)
-    input_ = dict(sorted(input_.items(), key=lambda word: word[1], reverse=True))
-
-
-    # # DEBUG: ----------------------------------------------------------------
-    # print("PROBABILIDAD:")
-    # for key, value in input_.items():
-    #     print(key, ":", value)
-    # print(len(input_))
-    # # -----------------------------------------------------------------------
+    # *** Codificación del archivo
+    o_huffman = Huffman(input_file)
+    o_huffman.compress()
 
     # first = True
     # pq = PriorityQueue(len(input_))
@@ -140,9 +160,19 @@ def main():
     end_time = time.time()
     elapsed_time = (end_time - start_time)# * (10**3)
     print(f"TIempo de ejecución: {elapsed_time:.4f}s.")
+
+    # print(vars(o_huffman))
+    # o_huffman._print_freq()
+    o_huffman._print_heap()
     
     print("Done.")
 
 
 if __name__ == "__main__":
     main()
+    # v = Compression("txt", {1: 'a', 2: 'b'})
+    # f = r"dd.dict"
+    # pickle_dict(v, f)
+
+    # r = unpickle_dict(f)
+    # print(vars(r))
