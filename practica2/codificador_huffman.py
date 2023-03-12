@@ -33,19 +33,22 @@ class Huffman:
             self.right = None
 
         def __lt__(self, other: object) -> bool:
-            if not isinstance(other, type(self)):
-               raise TypeError(f"El objeto {other} tiene que ser de tipo Node.") # 'other must be proper Position type'
+            if not isinstance(other, Huffman.Node):
+               raise TypeError(f"El objeto other tiene que ser de tipo Node.") # 'other must be proper Position type'
             return self.freq < other.freq
         
         def __eq__(self, other: object) -> bool:
-            if not isinstance(other, type(self)):
-               raise TypeError(f"El objeto {other} tiene que ser de tipo Node.") # 'other must be proper Position type'
+            if other == None:
+                return False
+            if not isinstance(other, Huffman.Node):
+               raise TypeError(f"El objeto other tiene que ser de tipo Node.") # 'other must be proper Position type'
             return self.freq == other.freq
             
 
     def __init__(self, path: str) -> None:
         self.path = path
-        self.fn , self.ext = os.path.splitext(self.path)
+        self.file_name , self.ext = os.path.splitext(self.path)
+        self.out_fn = self.file_name + ".huff"
         self.freq = {}
         self.total_8 = 0
         self.total_16 = 0
@@ -53,11 +56,18 @@ class Huffman:
         self.heap = []
         self.code = {}
         self.reverse_map = {}
+        self.encoded_str = ""
         
     def compress(self):
         """Hace la compresión"""
         self.__read_input()
         self.__heap()
+        self.__tree()
+        self.__get_code()
+        self.__encode()
+        # self.__add_padding()
+        # bytearray
+        # self.__write_output()
 
     def __read_input(self):
         """Lee el archivo, cuenta las frecuencias de parejas debytes (2 hex),
@@ -111,6 +121,52 @@ class Huffman:
         for i in self.heap:
             print(i.symbol, ":", i.freq)
 
+    def __tree(self):
+        while(len(self.heap) > 1):
+            node1 = heapq.heappop(self.heap)
+            node2 = heapq.heappop(self.heap)
+
+            merged = self.Node(None, node1.freq + node2.freq)
+            merged.left = node1
+            merged.right = node2
+
+            heapq.heappush(self.heap, merged)
+
+    def __get_code(self):
+        root = heapq.heappop(self.heap)
+        current_code = ""
+        self.__recursive_encode(root, current_code)
+
+    def __recursive_encode(self, root, current_code):
+        if root == None:
+            return
+        if root.symbol != None:
+            self.code[root.symbol] = current_code
+            self.reverse_map[current_code] = root.symbol
+            return
+        self.__recursive_encode(root.left, current_code + "0")
+        self.__recursive_encode(root.right, current_code + "1")
+
+    def __encode(self):
+        holder = None
+        symbol = None
+        counter = 0
+        with open(self.path, "rb") as file, open(self.out_fn, "wb") as out_file:
+            for byte_ in file.read():
+                counter += 1
+                if counter % 2 != 0:
+                    holder = hex(byte_)
+                    continue
+                symbol = holder + "\\" + hex(byte_)
+                self.encoded_str = self.code[symbol]
+                byte_ = bytearray
+
+
+    def _print_code(self):
+        for k, v in self.code.items():
+            print(k, ":", v)
+            
+
     # def __probability(self):
     #     self.prob = {key: value / self.total_16 for key, value in self.freq.items()}
 
@@ -137,6 +193,7 @@ def main():
     # *** Entrada:
     # TODO: este es un archivo fijo, elimina la primera línea y descomenta la segunda y tercera.
     input_file = r"test3.bin" # input_file = r"practica2_input.jpg"
+    # input_file = r"test10.jpg"
     # args = arguments_parser()
     # input_file = str(args.file_name)
 
@@ -162,8 +219,13 @@ def main():
     print(f"TIempo de ejecución: {elapsed_time:.4f}s.")
 
     # print(vars(o_huffman))
+    # print("-------------------------")
     # o_huffman._print_freq()
-    o_huffman._print_heap()
+    # print("-------------------------")
+    # o_huffman._print_heap()
+    # print("-------------------------")
+    # o_huffman._print_code()
+    print(o_huffman.encoded_str)
     
     print("Done.")
 
