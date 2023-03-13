@@ -8,12 +8,6 @@
 # fija de 16 bits.
 
 
-
-# from collections.OrderedDict
-# TODO: importar arbol binario y lista o diccionario ordenado
-# from collections import OrderedDict
-#from estructuras import *
-
 import argparse
 import heapq
 import os
