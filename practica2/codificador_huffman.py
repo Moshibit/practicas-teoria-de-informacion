@@ -146,7 +146,7 @@ class Huffman:
         symbol = None
         byte_counter = 0 # Cuenta los bytes del archivo de lectura
         byte_str = "" # los bit a ser puesto en le archvio de escritura
-        with open(self.path, "rb") as file, open(self.out_fn, "wb") as out_file: # mode out: "ab" ??
+        with open(self.path, "rb") as file, open(self.out_fn, "wb") as out_file:
             for byte_ in file.read():
                 byte_output = bytearray()
                 byte_counter += 1
@@ -164,7 +164,8 @@ class Huffman:
             padding = 8 - len(byte_str)
             byte_str = byte_str + "0" * padding
             byte_output.append(int(byte_str, 2))
-            out_file.write(byte_output)
+            with open(self.out_fn, "ab") as out_file:
+                out_file.write(byte_output)
 
 
     def _print_code(self):
@@ -230,7 +231,7 @@ def main():
     # print("-------------------------")
     # o_huffman._print_heap()
     # print("-------------------------")
-    # o_huffman._print_code()
+    o_huffman._print_code()
     print(o_huffman.encoded_str)
     
     print("Done.")
