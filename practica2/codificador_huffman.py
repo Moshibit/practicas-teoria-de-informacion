@@ -19,7 +19,6 @@ import heapq
 import os
 import time
 
-from queue import PriorityQueue
 from common import Compression, pickle_dict
 
 class Huffman:
@@ -34,16 +33,16 @@ class Huffman:
 
         def __lt__(self, other: object) -> bool:
             if not isinstance(other, Huffman.Node):
-               raise TypeError(f"El objeto other tiene que ser de tipo Node.") # 'other must be proper Position type'
+                raise TypeError(f"El objeto {other} tiene que ser de tipo Node.")
             return self.freq < other.freq
-        
+
         def __eq__(self, other: object) -> bool:
-            if other == None:
+            if other is None:
                 return False
             if not isinstance(other, Huffman.Node):
-               raise TypeError(f"El objeto other tiene que ser de tipo Node.") # 'other must be proper Position type'
+                raise TypeError(f"El objeto {other} tiene que ser de tipo Node.")
             return self.freq == other.freq
-            
+
 
     def __init__(self, path: str) -> None:
         self.path = path
@@ -52,12 +51,11 @@ class Huffman:
         self.freq = {}
         self.total_8 = 0
         self.total_16 = 0
-        self.prob = PriorityQueue() # {} # var si alamccenar tuplas (v: k)
         self.heap = []
         self.code = {}
         self.reverse_map = {}
         self.encoded_str = ""
-        
+
     def compress(self):
         """Hace la compresión"""
         self.__read_input()
@@ -106,7 +104,7 @@ class Huffman:
         # # DEBUG(FIN) --------------------------------------------------------
 
     def _print_freq(self):
-        """IMprime el diccionario de frecuencias, para uso de debug"""
+        """Imprime el diccionario de frecuencias, para uso de debug"""
         print("FREQ DICT:")
         for k, v in self.freq.items():
             print(k, ":", v)
@@ -117,12 +115,8 @@ class Huffman:
             node = self.Node(key, value)
             heapq.heappush(self.heap, node)
 
-    def _print_heap(self):
-        for i in self.heap:
-            print(i.symbol, ":", i.freq)
-
     def __tree(self):
-        while(len(self.heap) > 1):
+        while len(self.heap) > 1:
             node1 = heapq.heappop(self.heap)
             node2 = heapq.heappop(self.heap)
 
@@ -138,9 +132,9 @@ class Huffman:
         self.__recursive_encode(root, current_code)
 
     def __recursive_encode(self, root, current_code):
-        if root == None:
+        if root is None:
             return
-        if root.symbol != None:
+        if root.symbol is not None:
             self.code[root.symbol] = current_code
             self.reverse_map[current_code] = root.symbol
             return
@@ -150,27 +144,39 @@ class Huffman:
     def __encode(self):
         holder = None
         symbol = None
-        counter = 0
-        with open(self.path, "rb") as file, open(self.out_fn, "wb") as out_file:
+        byte_counter = 0 # Cuenta los bytes del archivo de lectura
+        byte_str = "" # los bit a ser puesto en le archvio de escritura
+        with open(self.path, "rb") as file, open(self.out_fn, "wb") as out_file: # mode out: "ab" ??
             for byte_ in file.read():
-                counter += 1
-                if counter % 2 != 0:
+                byte_output = bytearray()
+                byte_counter += 1
+                if byte_counter % 2 != 0:
                     holder = hex(byte_)
                     continue
                 symbol = holder + "\\" + hex(byte_)
-                self.encoded_str = self.code[symbol]
-                byte_ = bytearray
+                byte_str += self.code[symbol]
+                while len(byte_str) >= 8:
+                    byte_output.append(int(byte_str[:8], 2))
+                    byte_str = byte_str[8:]
+                out_file.write(byte_output)
+
+        if len(byte_str) < 8:
+            padding = 8 - len(byte_str)
+            byte_str = byte_str + "0" * padding
+            byte_output.append(int(byte_str, 2))
+            out_file.write(byte_output)
 
 
     def _print_code(self):
+        """Imprime el diccionario del código, para uso de debug"""
         for k, v in self.code.items():
             print(k, ":", v)
-            
+
 
     # def __probability(self):
     #     self.prob = {key: value / self.total_16 for key, value in self.freq.items()}
 
-    # para ordenar 
+    # para ordenar
     #input_ = dict(sorted(input_.items(), key=lambda word: word[1], reverse=True))
 
 def arguments_parser():
