@@ -51,6 +51,7 @@ class Huffman:
         self.code = {}
         self.reverse_code = {}
         self.padding = 0
+        self.padding_16 = False
 
     def compress(self):
         """Hace la compresión"""
@@ -93,6 +94,7 @@ class Huffman:
                 self.freq[symbol] = 0
             self.freq[symbol] += 1
             self.total_16 += 1
+            self.padding_16 = True
         # # DEBUG: ------------------------------------------------------------
         # print(f"el último síbolo es: {symbol}")
         # # DEBUG(FIN) --------------------------------------------------------
@@ -167,17 +169,18 @@ class Huffman:
             print(k, ":", v)
 
     def __pickle(self):
-        """Serializa el diccionario y la extención del archivo original, para 
-        que se puedan llevar al script de decodificación y esa información se 
-        pueda recuperar.
+        """Serializa el diccionario [codigo: símbolo] y la extención del 
+        archivo original, para que se puedan llevar al script de decodificación
+        y esa información se pueda recuperar.
         """
-        serial = [self.ext, self.padding, self.reverse_code]
+        #[str, int, bool, dict[str: str]]
+        serial = [self.ext, self.padding, self.padding_16, self.reverse_code]
         with open(self.file_dict, 'wb') as file:
             pickle.dump(serial, file)
 
 
 def arguments_parser():
-    """Resive el nombre del archivo a comprimir como argumento desde la línea 
+    """Recive el nombre del archivo a comprimir como argumento desde la línea 
     de mandos.
     """
     parser = argparse.ArgumentParser()
@@ -207,14 +210,14 @@ def main():
     # *** Cálculo de tiempo de ejecución:
     end_time = time.time()
     elapsed_time = (end_time - start_time)# * (10**3)
-    print(f"TIempo de ejecución: {elapsed_time:.4f}s.")
+    print(f"Tiempo de ejecución: {elapsed_time:.4f}s.")
 
     # # DEBUG: ----------------------------------------------------------------
     # print(vars(o_huffman))
     # print("-------------------------")
     # o_huffman._print_freq()
     # print("-------------------------")
-    # o_huffman._print_code()
+    o_huffman._print_code()
     # # -----------------------------------------------------------------------
     
     print("Done.")
