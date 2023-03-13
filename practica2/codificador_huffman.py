@@ -17,11 +17,12 @@
 import argparse
 import heapq
 import os
+import pickle
 import time
 
-from common import Compression, pickle_dict
 
 class Huffman:
+    """Codifica (comprime) un archivo binario en bloques de 16 bits."""
 
     class Node:
         """clase anidada: Nodo..."""
@@ -48,13 +49,14 @@ class Huffman:
         self.path = path
         self.file_name , self.ext = os.path.splitext(self.path)
         self.out_fn = self.file_name + ".huff"
+        self.file_dict = self.file_name + ".dict"
         self.freq = {}
         self.total_8 = 0
         self.total_16 = 0
         self.heap = []
         self.code = {}
-        self.reverse_map = {}
-        self.encoded_str = ""
+        self.reverse_code = {}
+        self.padding = 0
 
     def compress(self):
         """Hace la compresión"""
@@ -63,9 +65,7 @@ class Huffman:
         self.__tree()
         self.__get_code()
         self.__encode()
-        # self.__add_padding()
-        # bytearray
-        # self.__write_output()
+        self.__pickle()
 
     def __read_input(self):
         """Lee el archivo, cuenta las frecuencias de parejas debytes (2 hex),
@@ -136,7 +136,7 @@ class Huffman:
             return
         if root.symbol is not None:
             self.code[root.symbol] = current_code
-            self.reverse_map[current_code] = root.symbol
+            self.reverse_code[current_code] = root.symbol
             return
         self.__recursive_encode(root.left, current_code + "0")
         self.__recursive_encode(root.right, current_code + "1")
@@ -161,24 +161,26 @@ class Huffman:
                 out_file.write(byte_output)
 
         if len(byte_str) < 8:
-            padding = 8 - len(byte_str)
-            byte_str = byte_str + "0" * padding
+            self.padding = 8 - len(byte_str)
+            byte_str = byte_str + "0" * self.padding
             byte_output.append(int(byte_str, 2))
             with open(self.out_fn, "ab") as out_file:
                 out_file.write(byte_output)
-
 
     def _print_code(self):
         """Imprime el diccionario del código, para uso de debug"""
         for k, v in self.code.items():
             print(k, ":", v)
 
+    def __pickle(self):
+        """Serializa el diccionario y la extención del archivo original, para 
+        que se puedan llevar al script de decodificación y esa información se 
+        pueda recuperar.
+        """
+        serial = [self.ext, self.padding, self.reverse_code]
+        with open(self.file_dict, 'wb') as file:
+            pickle.dump(serial, file)
 
-    # def __probability(self):
-    #     self.prob = {key: value / self.total_16 for key, value in self.freq.items()}
-
-    # para ordenar
-    #input_ = dict(sorted(input_.items(), key=lambda word: word[1], reverse=True))
 
 def arguments_parser():
     """Resive el nombre del archivo a comprimir como argumento desde la línea 
@@ -198,50 +200,31 @@ def main():
     start_time = time.time()
 
     # *** Entrada:
-    # TODO: este es un archivo fijo, elimina la primera línea y descomenta la segunda y tercera.
-    input_file = r"test3.bin" # input_file = r"practica2_input.jpg"
+    # TODO: elimina las siguientes 2 líneas y descomenta la tercera y cuarta.
+    # input_file = r"test3.bin"
     # input_file = r"test10.jpg"
-    # args = arguments_parser()
-    # input_file = str(args.file_name)
+    args = arguments_parser()
+    input_file = str(args.file_name)
 
     # *** Codificación del archivo
     o_huffman = Huffman(input_file)
     o_huffman.compress()
-
-    # first = True
-    # pq = PriorityQueue(len(input_))
-    # for k, v in input_.items():
-    #     if first:
-    #         #pq.put( LinkedBinaryTree.root() )
-    #         first = False
-    #     else:
-
-
-    # while not pq.empty():
-    #     print(pq.get())
 
     # *** Cálculo de tiempo de ejecución:
     end_time = time.time()
     elapsed_time = (end_time - start_time)# * (10**3)
     print(f"TIempo de ejecución: {elapsed_time:.4f}s.")
 
+    # # DEBUG: ----------------------------------------------------------------
     # print(vars(o_huffman))
     # print("-------------------------")
     # o_huffman._print_freq()
     # print("-------------------------")
-    # o_huffman._print_heap()
-    # print("-------------------------")
-    o_huffman._print_code()
-    print(o_huffman.encoded_str)
+    # o_huffman._print_code()
+    # # -----------------------------------------------------------------------
     
     print("Done.")
 
 
 if __name__ == "__main__":
     main()
-    # v = Compression("txt", {1: 'a', 2: 'b'})
-    # f = r"dd.dict"
-    # pickle_dict(v, f)
-
-    # r = unpickle_dict(f)
-    # print(vars(r))
