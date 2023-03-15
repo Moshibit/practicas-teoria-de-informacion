@@ -13,7 +13,7 @@ import os
 import pickle
 import time
 
-
+# TODO: OJO con los ceros a la izquierda qeu no pone el bin(byte_)[2:]
 
 class Huffman:
     """Decodifica (descomprime) un archivo binario."""
@@ -36,6 +36,9 @@ class Huffman:
         """Hace la compresión"""
         self.__unpickle()
 
+        with open(self.path, "rb") as file, open(self.out_fn, "wb") as out_file:
+            for byte_ in file.read():
+                print(bin(byte_)[2:])
 
 
         # self.__read_input()
@@ -53,7 +56,7 @@ class Huffman:
         with open(self.file_dict, "rb") as file:
             obj = pickle.load(file)
 
-        print(obj)
+        # print(obj)
         print(type(obj))
 
         self.ext = obj[0]
@@ -61,7 +64,7 @@ class Huffman:
         self.padding_16 = obj[2]
         self.reverse_code = obj[3]
 
-        self.out_fn = self.file_name + self.ext
+        self.out_fn = self.file_name + "_decompressed" + self.ext
 
 
 
