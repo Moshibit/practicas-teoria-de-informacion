@@ -156,7 +156,21 @@ class Huffman:
                     byte_str = byte_str[8:]
                 out_file.write(byte_output)
 
+        # verifica que no falte por formar una pareja
+        if self.total_8 % 2 != 0:
+            byte_output = bytearray() # <-----
+            symbol = holder + "\\" + hex(0)
+            byte_str += self.code[symbol]
+            while len(byte_str) >= 8:
+                byte_output.append(int(byte_str[:8], 2))
+                byte_str = byte_str[8:]
+            with open(self.out_fn, "ab") as out_file:
+                out_file.write(byte_output)
+
+
+        # agrega el padding
         if len(byte_str) < 8:
+            byte_output = bytearray() # <-----
             self.padding = 8 - len(byte_str)
             byte_str = byte_str + "0" * self.padding
             byte_output.append(int(byte_str, 2))
@@ -217,7 +231,7 @@ def main():
     # print("-------------------------")
     # o_huffman._print_freq()
     # print("-------------------------")
-    o_huffman._print_code()
+    # o_huffman._print_code()
     # # -----------------------------------------------------------------------
     
     print("Done.")
