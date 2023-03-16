@@ -21,24 +21,24 @@ class Huffman:
     def __init__(self, path: str) -> None:
         self.path = path
         self.file_name , self.ext = os.path.splitext(self.path)
+        self.temp_file = self.file_name + "_temp.txt"
         self.out_fn = None
-        self.file_dict = self.file_name + ".dict"
+        self.file_dict = self.file_name + "_huff.dict"
         # self.freq = {}
         # self.total_8 = 0
         # self.total_16 = 0
         # self.heap = []
         # self.code = {}
-        self.reverse_code = {}
+        self.symbols_len = None
+        self.decode_dict = {}
         self.padding = 0
-        self.padding_16 = False
+        self.last_symbol = False
 
     def decompress(self):
         """Hace la compresión"""
         self.__unpickle()
+        self.__hex_to_bin()
 
-        with open(self.path, "rb") as file, open(self.out_fn, "wb") as out_file:
-            for byte_ in file.read():
-                print(bin(byte_)[2:])
 
 
         # self.__read_input()
@@ -46,6 +46,25 @@ class Huffman:
         # self.__tree()
         # self.__get_code()
         # self.__encode()
+
+
+    def __hex_to_bin(self):
+        bit_str = ""
+        with open(self.path, "rb") as file, open(self.temp_file, "wt", encoding="utf-8") as out_file:
+            for byte_ in file.read():
+                bit_str += bin(byte_)[2:]
+
+                centinel = True
+                symbol = ""
+                while centinel:
+                    for char in bit_str:
+                        symbol += char
+                        if symbol in 
+
+
+
+        print(bit_str)
+
 
     def __unpickle(self):
         """Recupera el diccionario [codigo: símbolo] y la extención del 
@@ -61,10 +80,11 @@ class Huffman:
 
         self.ext = obj[0]
         self.padding = obj[1]
-        self.padding_16 = obj[2]
-        self.reverse_code = obj[3]
+        self.last_symbol = obj[2]
+        self.symbols_len = obj[3]
+        self.decode_dict = obj[4]
 
-        self.out_fn = self.file_name + "_decompressed" + self.ext
+        self.out_fn = self.file_name + "_huff_decompressed" + self.ext
 
 
 
@@ -133,7 +153,7 @@ def main():
 # 		decoded_text = ""
 
 # 		for bit in encoded_text:
-# 			current_code += bit
+# 			current_code += bit 
 # 			if(current_code in self.reverse_mapping):
 # 				character = self.reverse_mapping[current_code]
 # 				decoded_text += character
