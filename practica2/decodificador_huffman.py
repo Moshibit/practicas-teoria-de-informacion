@@ -97,15 +97,16 @@ class Huffman:
                         symbol = self.decode_dict[bin_code]
                         a, b = self.__split_hex_pair(symbol)
                         if symbol_counter == self.symbols_len:
-                            print(chr(int(a, 16)))
+                            #print(chr(int(a, 16)))
+                            out_file.write(a)
                         else:
-                            print(chr(int(a, 16)), chr(int(b, 16)), sep="", end="")
+                            #print(chr(int(a, 16)), chr(int(b, 16)), sep="", end="")
+                            out_file.write(a)
+                            out_file.write(b)
                         bin_code = ""
                         if symbol_counter == self.symbols_len:
                             break
                     bit_str = bit_str[bit_counter + 1:]
-
-
 
         # print(bit_str)
         # print(bit_str_org)
@@ -115,8 +116,13 @@ class Huffman:
         """Recupera el diccionario [codigo: símbolo] y la extención del 
         archivo original desde el archivo .dict.
         """
-        # [str, int, bool, dict[str: str]]
-        # serial = [self.ext, self.padding, self.padding_16, self.reverse_code]
+        #[str, int, str, dict[str: str]
+        # 0: la extención original
+        # 1: numero de ceros agregados al bytearray
+        # 2: último par de hexadecimales con padding, si no se agrego paddding es None
+        # 3: total de símbolos a decodificar
+        # 4: el diccionaraio para decodificar
+        
         with open(self.file_dict, "rb") as file:
             obj = pickle.load(file)
 
@@ -169,7 +175,7 @@ def main():
     print(f"Tiempo de ejecución: {elapsed_time:.4f}s.")
 
     # # DEBUG: ----------------------------------------------------------------
-    print(vars(o_huffman))
+    # print(vars(o_huffman))
     # print("-------------------------")
     # o_huffman._print_freq()
     # print("-------------------------")
