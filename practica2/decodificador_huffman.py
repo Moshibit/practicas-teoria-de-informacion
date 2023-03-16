@@ -70,6 +70,11 @@ class Huffman:
     # print(a, b)
     # a = int(a, 16)
     # b = int(b, 16)
+    #print(a, b)
+    #a = chr(a)
+    #b = chr(b)
+    #print(a, b)
+    #print(d)
     ######################
 
     def __read_file(self):
@@ -77,6 +82,7 @@ class Huffman:
         bit_str_org = ""
         with open(self.path, "rb") as file, open(self.temp_file, "wt", encoding="utf-8") as out_file:
             bin_code = ""
+            symbol_counter = 0
             for byte_ in file.read():
                 # print(hex(byte_))
                 bit_str += self.__hex_to_bin(byte_)
@@ -87,16 +93,22 @@ class Huffman:
                     bin_code += char
                     bit_counter += 1
                     if bin_code in self.decode_dict:
+                        symbol_counter += 1
                         symbol = self.decode_dict[bin_code]
                         a, b = self.__split_hex_pair(symbol)
-                        print(chr(int(a, 16)), chr(int(b, 16)), sep="", end="")
+                        if symbol_counter == self.symbols_len:
+                            print(chr(int(a, 16)))
+                        else:
+                            print(chr(int(a, 16)), chr(int(b, 16)), sep="", end="")
                         bin_code = ""
+                        if symbol_counter == self.symbols_len:
+                            break
                     bit_str = bit_str[bit_counter + 1:]
 
 
 
         # print(bit_str)
-        print(bit_str_org)
+        # print(bit_str_org)
 
 
     def __unpickle(self):
