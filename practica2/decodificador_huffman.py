@@ -21,7 +21,6 @@ class Huffman:
     def __init__(self, path: str) -> None:
         self.path = path
         self.file_name , self.ext = os.path.splitext(self.path)
-        self.temp_file = self.file_name + "_temp.txt"
         self.out_fn = None
         self.file_dict = self.file_name + "_huff.dict"
         # self.freq = {}
@@ -80,7 +79,7 @@ class Huffman:
     def __read_file(self):
         bit_str = ""
         bit_str_org = ""
-        with open(self.path, "rb") as file, open(self.temp_file, "wb") as out_file:
+        with open(self.path, "rb") as file, open(self.out_fn, "wb") as out_file:
             bin_code = ""
             symbol_counter = 0
             for byte_ in file.read():
@@ -167,7 +166,7 @@ def main():
 
     # *** Entrada:
     # TODO: elimina las siguientes 2 líneas y descomenta la tercera y cuarta.
-    input_file = r"test3.huff"
+    input_file = r"test10.huff"
     # input_file = r"test10.jpg"
     # args = arguments_parser()
     # input_file = str(args.file_name)
