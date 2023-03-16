@@ -52,9 +52,13 @@ class Huffman:
         list_ = str_.split("\\")
         return (list_[0], list_[1])
     
-    def __hex_to_bin(self, hex_str ):
+    def __hex_to_bin(self, byte ):
         """pass"""
-        bin(hex_str)[2:]
+        bin_ = bin(byte)[2:]
+        if len(bin_) < 8:
+            zeros = "0" * (8 - len(bin_))
+            bin_ = zeros + bin_
+        return bin_
 
 
     
@@ -73,7 +77,7 @@ class Huffman:
             bin_code = ""
             for byte_ in file.read():
                 # print(hex(byte_))
-                bit_str += bin(byte_)[2:]
+                bit_str += self.__hex_to_bin(byte_)
                 bit_str_org += bin(byte_)[2:]
 
                 
@@ -84,7 +88,7 @@ class Huffman:
                     if bin_code in self.decode_dict:
                         symbol = self.decode_dict[bin_code]
                         a, b = self.__split_hex_pair(symbol)
-                        print(chr(int(a, 16)), chr(int(b, 16)), sep="", end="")
+                        #print(chr(int(a, 16)), chr(int(b, 16)), sep="", end="")
                         bin_code = ""
                     bit_str = bit_str[bit_counter + 1:]
 
