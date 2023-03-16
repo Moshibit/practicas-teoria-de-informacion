@@ -9,84 +9,193 @@
 
 
 import argparse
+import heapq
 import os
 import pickle
 import time
 
-# TODO: OJO con los ceros a la izquierda qeu no pone el bin(byte_)[2:]
 
 class Huffman:
-    """Decodifica (descomprime) un archivo binario."""
+    """Codifica (comprime) un archivo binario en bloques de 16 bits."""
+
+    class Node:
+        """clase anidada: Nodo..."""
+        def __init__(self, symbol, freq):
+            self.symbol = symbol
+            self.freq = freq
+            self.left = None
+            self.right = None
+
+        def __lt__(self, other: object) -> bool:
+            if not isinstance(other, Huffman.Node):
+                raise TypeError(f"El objeto {other} tiene que ser de tipo Node.")
+            return self.freq < other.freq
+
+        def __eq__(self, other: object) -> bool:
+            if other is None:
+                return False
+            if not isinstance(other, Huffman.Node):
+                raise TypeError(f"El objeto {other} tiene que ser de tipo Node.")
+            return self.freq == other.freq
+
 
     def __init__(self, path: str) -> None:
         self.path = path
         self.file_name , self.ext = os.path.splitext(self.path)
-        self.temp_file = self.file_name + "_temp.txt"
-        self.out_fn = None
+        self.out_fn = self.file_name + ".huff"
         self.file_dict = self.file_name + "_huff.dict"
-        # self.freq = {}
-        # self.total_8 = 0
-        # self.total_16 = 0
-        # self.heap = []
-        # self.code = {}
-        self.symbols_len = None
+        self.freq = {}
+        self.total_8 = 0
+        self.total_16 = 0
+        self.heap = []
+        self.code_dict = {}
         self.decode_dict = {}
         self.padding = 0
-        self.last_symbol = False
+        self.padding_16 = None
 
-    def decompress(self):
+    def compress(self):
         """Hace la compresión"""
-        self.__unpickle()
-        self.__hex_to_bin()
+        self.__read_input()
+        self.__heap()
+        self.__tree()
+        self.__get_code()
+        self.__encode()
+        self.__pickle()
 
-
-
-        # self.__read_input()
-        # self.__heap()
-        # self.__tree()
-        # self.__get_code()
-        # self.__encode()
-
-
-    def __hex_to_bin(self):
-        bit_str = ""
-        with open(self.path, "rb") as file, open(self.temp_file, "wt", encoding="utf-8") as out_file:
-            for byte_ in file.read():
-                bit_str += bin(byte_)[2:]
-
-                centinel = True
-                symbol = ""
-                while centinel:
-                    for char in bit_str:
-                        symbol += char
-                        if symbol in 
-
-
-
-        print(bit_str)
-
-
-    def __unpickle(self):
-        """Recupera el diccionario [codigo: símbolo] y la extención del 
-        archivo original desde el archivo .dict.
+    def __read_input(self):
+        """Lee el archivo, cuenta las frecuencias de parejas debytes (2 hex),
+        uenta cuantos bytes tiene el archivo, y cuantas parejas de bytes
         """
-        # [str, int, bool, dict[str: str]]
-        # serial = [self.ext, self.padding, self.padding_16, self.reverse_code]
-        with open(self.file_dict, "rb") as file:
-            obj = pickle.load(file)
+        holder = None
+        symbol = None
 
-        # print(obj)
-        print(type(obj))
+        # forma el diccionario de frecuencias
+        with open(self.path, "rb") as file:
+            for byte_ in file.read():
+                self.total_8 += 1
+                if self.total_8 % 2 != 0:
+                    holder = hex(byte_)
+                    continue
+                symbol = holder + "\\" + hex(byte_)
+                if not symbol in self.freq:
+                    self.freq[symbol] = 0
+                self.freq[symbol] += 1
+                self.total_16 += 1
+                # # DEBUG: ----------------------------------------------------
+                # if self.total_16 == 1:
+                #     print(f"el primer simbolo es: {symbol}")
+                # # DEBUG(FIN) ------------------------------------------------
 
-        self.ext = obj[0]
-        self.padding = obj[1]
-        self.last_symbol = obj[2]
-        self.symbols_len = obj[3]
-        self.decode_dict = obj[4]
+        # verifica que no se omitiera un simbolo
+        # le agrega paddin de ser necesario
+        if self.total_8 % 2 != 0:
+            symbol = holder + "\\" + hex(0)
+            if not symbol in self.freq:
+                self.freq[symbol] = 0
+            self.freq[symbol] += 1
+            self.total_16 += 1
+            self.padding_16 = symbol
+        # # DEBUG: ------------------------------------------------------------
+        # print(f"el último síbolo es: {symbol}")
+        # # DEBUG(FIN) --------------------------------------------------------
 
-        self.out_fn = self.file_name + "_huff_decompressed" + self.ext
+    def _print_freq(self):
+        """Imprime el diccionario de frecuencias, para uso de debug"""
+        print("FREQ DICT:")
+        for k, v in self.freq.items():
+            print(k, ":", v)
+
+    def __heap(self) -> None:
+        """Forma el monticulo (heap)"""
+        for key, value in self.freq.items():
+            node = self.Node(key, value)
+            heapq.heappush(self.heap, node)
+
+    def __tree(self):
+        while len(self.heap) > 1:
+            node1 = heapq.heappop(self.heap)
+            node2 = heapq.heappop(self.heap)
+
+            merged = self.Node(None, node1.freq + node2.freq)
+            merged.left = node1
+            merged.right = node2
+
+            heapq.heappush(self.heap, merged)
+
+    def __get_code(self):
+        root = heapq.heappop(self.heap)
+        current_code = ""
+        self.__recursive_encode(root, current_code)
+
+    def __recursive_encode(self, root, current_code):
+        if root is None:
+            return
+        if root.symbol is not None:
+            self.code_dict[root.symbol] = current_code
+            self.decode_dict[current_code] = root.symbol
+            return
+        self.__recursive_encode(root.left, current_code + "0")
+        self.__recursive_encode(root.right, current_code + "1")
+
+    def __encode(self):
+        holder = None
+        symbol = None
+        byte_counter = 0 # Cuenta los bytes del archivo de lectura
+        byte_str = "" # los bit a ser puesto en le archvio de escritura
+        with open(self.path, "rb") as file, open(self.out_fn, "wb") as out_file:
+            for byte_ in file.read():
+                byte_output = bytearray()
+                byte_counter += 1
+                if byte_counter % 2 != 0:
+                    holder = hex(byte_)
+                    continue
+                symbol = holder + "\\" + hex(byte_)
+                byte_str += self.code_dict[symbol]
+                while len(byte_str) >= 8:
+                    byte_output.append(int(byte_str[:8], 2))
+                    byte_str = byte_str[8:]
+                out_file.write(byte_output)
+
+        # verifica que no falte por formar una pareja
+        if self.total_8 % 2 != 0:
+            byte_output = bytearray() # <-----
+            symbol = holder + "\\" + hex(0)
+            byte_str += self.code_dict[symbol]
+            while len(byte_str) >= 8:
+                byte_output.append(int(byte_str[:8], 2))
+                byte_str = byte_str[8:]
+            with open(self.out_fn, "ab") as out_file:
+                out_file.write(byte_output)
 
 
+        # agrega el padding
+        if len(byte_str) < 8:
+            byte_output = bytearray() # <-----
+            self.padding = 8 - len(byte_str)
+            byte_str = byte_str + "0" * self.padding
+            byte_output.append(int(byte_str, 2))
+            with open(self.out_fn, "ab") as out_file:
+                out_file.write(byte_output)
+
+    def _print_code(self):
+        """Imprime el diccionario del código, para uso de debug"""
+        for k, v in self.code_dict.items():
+            print(k, ":", v)
+
+    def __pickle(self):
+        """Serializa el diccionario [codigo: símbolo] y la extención del 
+        archivo original, para que se puedan llevar al script de decodificación
+        y esa información se pueda recuperar.
+        """
+        #[str, int, str, dict[str: str]
+        # 0: la extención original
+        # 1: numero de ceros agregados al bytearray
+        # 2: último par de hexadecimales con padding, si no se agrego paddding es None
+        # 3: total de símbolos a decodificar
+        # 4: el diccionaraio para decodificar
+        serial = [self.ext, self.padding, self.padding_16, self.total_16, self.decode_dict]
+        with open(self.file_dict, 'wb') as file:
+            pickle.dump(serial, file)
 
 
 def arguments_parser():
@@ -108,15 +217,14 @@ def main():
 
     # *** Entrada:
     # TODO: elimina las siguientes 2 líneas y descomenta la tercera y cuarta.
-    input_file = r"test3.huff"
+    # input_file = r"test3.bin"
     # input_file = r"test10.jpg"
-    # args = arguments_parser()
-    # input_file = str(args.file_name)
+    args = arguments_parser()
+    input_file = str(args.file_name)
 
-    # *** decodificación del archivo
+    # *** Codificación del archivo
     o_huffman = Huffman(input_file)
-    o_huffman.decompress()
-
+    o_huffman.compress()
 
     # *** Cálculo de tiempo de ejecución:
     end_time = time.time()
@@ -124,67 +232,14 @@ def main():
     print(f"Tiempo de ejecución: {elapsed_time:.4f}s.")
 
     # # DEBUG: ----------------------------------------------------------------
-    print(vars(o_huffman))
+    # print(vars(o_huffman))
     # print("-------------------------")
     # o_huffman._print_freq()
     # print("-------------------------")
     # o_huffman._print_code()
     # # -----------------------------------------------------------------------
-
-
-
+    
     print("Done.")
-
-
-
-
-
-# def remove_padding(self, padded_encoded_text):
-# 		padded_info = padded_encoded_text[:8]
-# 		extra_padding = int(padded_info, 2)
-
-# 		padded_encoded_text = padded_encoded_text[8:] 
-# 		encoded_text = padded_encoded_text[:-1*extra_padding]
-
-# 		return encoded_text
-
-# 	def decode_text(self, encoded_text):
-# 		current_code = ""
-# 		decoded_text = ""
-
-# 		for bit in encoded_text:
-# 			current_code += bit 
-# 			if(current_code in self.reverse_mapping):
-# 				character = self.reverse_mapping[current_code]
-# 				decoded_text += character
-# 				current_code = ""
-
-# 		return decoded_text
-
-
-# 	def decompress(self, input_path):
-# 		filename, file_extension = os.path.splitext(self.path)
-# 		output_path = filename + "_decompressed" + ".txt"
-
-# 		with open(input_path, 'rb') as file, open(output_path, 'w') as output:
-# 			bit_string = ""
-
-# 			byte = file.read(1)
-# 			while(len(byte) > 0):
-# 				byte = ord(byte)
-# 				bits = bin(byte)[2:].rjust(8, '0')
-# 				bit_string += bits
-# 				byte = file.read(1)
-
-# 			encoded_text = self.remove_padding(bit_string)
-
-# 			decompressed_text = self.decode_text(encoded_text)
-			
-# 			output.write(decompressed_text)
-
-# 		print("Decompressed")
-# 		return output_path
-
 
 
 if __name__ == "__main__":
