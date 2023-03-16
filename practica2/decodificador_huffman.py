@@ -80,7 +80,7 @@ class Huffman:
     def __read_file(self):
         bit_str = ""
         bit_str_org = ""
-        with open(self.path, "rb") as file, open(self.temp_file, "wt", encoding="utf-8") as out_file:
+        with open(self.path, "rb") as file, open(self.temp_file, "wb") as out_file:
             bin_code = ""
             symbol_counter = 0
             for byte_ in file.read():
@@ -96,13 +96,21 @@ class Huffman:
                         symbol_counter += 1
                         symbol = self.decode_dict[bin_code]
                         a, b = self.__split_hex_pair(symbol)
+                        a = int(a, 16)
+                        b = int(b, 16)
                         if symbol_counter == self.symbols_len:
-                            #print(chr(int(a, 16)))
-                            out_file.write(a)
+                            #print(chr(a))
+                            byte_output = bytearray()
+                            byte_output.append(a)
+                            out_file.write(byte_output)
                         else:
-                            #print(chr(int(a, 16)), chr(int(b, 16)), sep="", end="")
-                            out_file.write(a)
-                            out_file.write(b)
+                            #print(chr(a), chr(b), sep="", end="")
+                            byte_output = bytearray()
+                            byte_output.append(a)
+                            out_file.write(byte_output)
+                            byte_output = bytearray()
+                            byte_output.append(b)
+                            out_file.write(byte_output)
                         bin_code = ""
                         if symbol_counter == self.symbols_len:
                             break
