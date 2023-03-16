@@ -37,7 +37,7 @@ class Huffman:
     def decompress(self):
         """Hace la compresión"""
         self.__unpickle()
-        self.__hex_to_bin()
+        self.__read_file()
 
 
 
@@ -52,6 +52,12 @@ class Huffman:
         list_ = str_.split("\\")
         return (list_[0], list_[1])
     
+    def __hex_to_bin(self, hex_str ):
+        """pass"""
+        bin(hex_str)[2:]
+
+
+    
     ######################
     # d = "0x6d\\0x70"
     # a, b = split_hex_pair(d)
@@ -60,28 +66,32 @@ class Huffman:
     # b = int(b, 16)
     ######################
 
-    def __hex_to_bin(self):
+    def __read_file(self):
         bit_str = ""
+        bit_str_org = ""
         with open(self.path, "rb") as file, open(self.temp_file, "wt", encoding="utf-8") as out_file:
+            bin_code = ""
             for byte_ in file.read():
+                # print(hex(byte_))
                 bit_str += bin(byte_)[2:]
+                bit_str_org += bin(byte_)[2:]
 
-                code = ""
-                counter = 0
+                
+                bit_counter = 0
                 for char in bit_str:
-                    code += char
-                    counter += 1
-                    if code in self.decode_dict:
-                        symbol = self.decode_dict[code]
+                    bin_code += char
+                    bit_counter += 1
+                    if bin_code in self.decode_dict:
+                        symbol = self.decode_dict[bin_code]
                         a, b = self.__split_hex_pair(symbol)
                         print(chr(int(a, 16)), chr(int(b, 16)), sep="", end="")
-                        bit_str[counter + 1:] 
-                        code = ""
-                            
+                        bin_code = ""
+                    bit_str = bit_str[bit_counter + 1:]
 
 
 
-        print(bit_str)
+        # print(bit_str)
+        print(bit_str_org)
 
 
     def __unpickle(self):
@@ -94,7 +104,7 @@ class Huffman:
             obj = pickle.load(file)
 
         # print(obj)
-        print(type(obj))
+        # print(type(obj))
 
         self.ext = obj[0]
         self.padding = obj[1]
