@@ -47,6 +47,18 @@ class Huffman:
         # self.__get_code()
         # self.__encode()
 
+    def __split_hex_pair(self, str_):
+        """pass"""
+        list_ = str_.split("\\")
+        return (list_[0], list_[1])
+    
+    ######################
+    # d = "0x6d\\0x70"
+    # a, b = split_hex_pair(d)
+    # print(a, b)
+    # a = int(a, 16)
+    # b = int(b, 16)
+    ######################
 
     def __hex_to_bin(self):
         bit_str = ""
@@ -54,12 +66,18 @@ class Huffman:
             for byte_ in file.read():
                 bit_str += bin(byte_)[2:]
 
-                centinel = True
-                symbol = ""
-                while centinel:
-                    for char in bit_str:
-                        symbol += char
-                        if symbol in 
+                code = ""
+                counter = 0
+                for char in bit_str:
+                    code += char
+                    counter += 1
+                    if code in self.decode_dict:
+                        symbol = self.decode_dict[code]
+                        a, b = self.__split_hex_pair(symbol)
+                        print(chr(int(a, 16)), chr(int(b, 16)), sep="", end="")
+                        bit_str[counter + 1:] 
+                        code = ""
+                            
 
 
 
