@@ -3,24 +3,24 @@ print("hol21")
 class shannon():
   def __init__(self, d):
     self.d = d
-    self.code = [] # {}
+    self.code = [] #{}
 
   def shanon_start(self):
     print("***")
     iterable=list(self.d.values())
+    diff1=diff2=0
     print("I: ", iterable)
-    rv = None
+    if len(iterable) == 1:
+      self.code.append("0")
+      return
     if len(iterable) == 2:
       self.code.append("0")
       self.code.append("1")
-      print("[C]: ", "0")
-      print("[C]: ", "1")
       return
-      
     half = round(sum(iterable) / 2)
-    print("h:", half)
+    print("H:", half)
 
-    diff1=diff2=diff3=0
+
     for index in range(len(iterable)-2):
       group1 = iterable[:index+1]
       group2 = iterable[:index+2]
@@ -28,22 +28,23 @@ class shannon():
       sum2 = sum(group2)
       diff1 = (sum1 - half)
       diff2 = (sum2 - half)
-      print("g:", group1, group2)
-      print(sum1, sum2)
-      print("d:", diff1, diff2, diff3)
-      print("-------------------")
       if sum1 >= half:
+        print("G:", group1, group2)
+        print(sum1, sum2)
+        print("D:", diff1, diff2)
+        print("-------------------")
         break
         
-      self.sha(group1, "0")
-      self.sha(group2, "1")
+    self.sha(group1, "0")
+    self.sha(group2, "1")
 
   def sha(self, iterable, c):
     print("*_*")
     print("i: ", iterable)
+    diff1=diff2=0
     if len(iterable) == 1:
       self.code.append(c)
-      print("[C): ", c)
+      print("[c): ", c)
       return
     if len(iterable) == 2:
       self.sha(iterable[:1], c+"0")
@@ -52,7 +53,6 @@ class shannon():
       
     half = round(sum(iterable) / 2)
     print("h:", half)
-    diff1=diff2=diff3=0
     for index in range(len(iterable)-2):
       group1 = iterable[:index+1]
       group2 = iterable[:index+2]
@@ -60,11 +60,12 @@ class shannon():
       sum2 = sum(group2)
       diff1 = (sum1 - half)
       diff2 = (sum2 - half)
-      print("g:", group1, group2)
-      print(sum1, sum2)
-      print("d:", diff1, diff2, diff3)
-      print("-------------------")
+
       if sum1 >= half:
+        print("g:", group1, group2)
+        print(sum1, sum2)
+        print("d:", diff1, diff2)
+        print("-------------------")
         break
       
     self.sha(group1, c+"0")
