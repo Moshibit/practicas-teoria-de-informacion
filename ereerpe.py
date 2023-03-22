@@ -1,3 +1,5 @@
+from math import ceil
+
 print("hol21")
 
 class shannon():
@@ -17,18 +19,15 @@ class shannon():
       self.code.append("0")
       self.code.append("1")
       return
-    half = round(sum(iterable) / 2)
+    half = ceil(sum(iterable) / 2)
     print("H:", half)
-    for index in range(len(iterable)-2):
+    for index in range(len(iterable)-1):
       group1 = iterable[:index+1]
-      group2 = iterable[index+2:]
+      group2 = iterable[index+1:]
       sum1 = sum(group1)
       sum2 = sum(group2)
       diff1 = (sum1 - half)
       diff2 = (sum2 - half)
-      print("G_:", group1, group2)
-      print("S_:", sum1, sum2)
-      print("D_:", diff1, diff2)
       if sum1 >= half:
         print("G:", group1, group2)
         print("S:", sum1, sum2)
@@ -52,11 +51,11 @@ class shannon():
       self.sha(iterable[1:], c+"1")
       return
       
-    half = round(sum(iterable) / 2)
+    half = ceil(sum(iterable) / 2)
     print("h:", half)
-    for index in range(len(iterable)-2):
+    for index in range(len(iterable)-1):
       group1 = iterable[:index+1]
-      group2 = iterable[index+2:]
+      group2 = iterable[index+1:]
       sum1 = sum(group1)
       sum2 = sum(group2)
       diff1 = (sum1 - half)
