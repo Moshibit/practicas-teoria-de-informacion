@@ -3,24 +3,23 @@ from math import ceil
 class shannon():
   def __init__(self, d):
     self.d = d
-    self.code = [] #{}
+    self.code = {}
 
   def shanon_start(self):
-    #print("***")
     diff1=diff2=0
-    #print("I: ", self.d)
     if len(self.d) == 1:
-      self.code.append("1")
+      k = list(self.d.keys())[0]
+      self.code[k] = "1"
       return
     if len(self.d) == 2:
-      self.code.append("0")
-      self.code.append("1")
+      k = list(self.d.keys())
+      k1 = k[0]
+      k2 = k[1]
+      self.code[k1] = "0"
+      self.code[k2] = "1"
       return
     half = ceil(sum(self.d.values()) / 2)
-    #print("H:", half)
     for index in range(len(self.d)-1):
-      #group1 = iterable[:index+1]
-      #group2 = iterable[index+1:]
       d1 = dict(list(self.d.items())[:index+1])
       d2 = dict(list(self.d.items())[index+1:])
       sum1 = sum(d1.values())
@@ -28,22 +27,16 @@ class shannon():
       diff1 = (sum1 - half)
       diff2 = (sum2 - half)
       if sum1 >= half:
-        #print("G:", d1, d2)
-        #print("S:", sum1, sum2)
-        #print("D:", diff1, diff2)
-        #print("====================")
         break
 
     self.sha(d1, "0")
     self.sha(d2, "1")
 
   def sha(self, dict_, c):
-    #print("*_*")
-    #print("i: ", iterable)
     diff1=diff2=0
     if len(dict_) == 1:
-      self.code.append(c)
-      #print("[c): ", c)
+      k = list(dict_.keys())[0]
+      self.code[k] = c
       return
     if len(dict_) == 2:
       self.sha(dict(list(dict_.items())[:1]), c+"0")
@@ -51,7 +44,6 @@ class shannon():
       return
       
     half = ceil(sum(dict_.values()) / 2)
-    #print("h:", half)
     for index in range(len(dict_)-1):
       d1 = dict(list(dict_.items())[:index+1])
       d2 = dict(list(dict_.items())[index+1:])
@@ -61,10 +53,6 @@ class shannon():
       diff2 = (sum2 - half)
 
       if sum1 >= half:
-        #print("g:", d1, d2)
-        #print("s", sum1, sum2)
-        #print("d:", diff1, diff2)
-        #print("-------------------")
         break
       
     self.sha(d1, c+"0")
