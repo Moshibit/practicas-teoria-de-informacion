@@ -1,33 +1,24 @@
-def find_middle(lst):
-  if len(lst) == 1: return None
-  s = k = b = 0
-  for p in lst: s += p
-  s /= 2
-  for p in range(len(lst)):
-    k += lst[p]
-    if k == s: return p
-    elif k > s:
-      j = len(lst) - 1
-      while b < s:
-        b += lst[j]
-        j -= 1
-      return p if abs(s - k) < abs(s - b) else j
-  return
+print("hol21")
 
 class shannon():
   def __init__(self, d):
     self.d = d
-    self.code = {}
+    self.code = [] # {}
 
   def shanon_start(self):
     print("***")
     iterable=list(self.d.values())
     rv = None
-    if len(iterable) == 1: return rv
+    if len(iterable) == 2:
+      self.code.append("0")
+      self.code.append("1")
+      print("[C]: ", "0")
+      print("[C]: ", "1")
+      return
+      
     half = round(sum(iterable) / 2)
     print("h:", half)
     print("I: ", iterable)
-    group1=group2=0
     diff1=diff2=diff3=0
     for index in range(len(iterable)-2):
       group1 = iterable[:index+1]
@@ -42,19 +33,20 @@ class shannon():
       print("-------------------")
       if sum1 >= half:
         break
-      rv = (group1, group2)
-      if rv:
-        self.sha(group1, "0")
-        self.sha(group2, "1")
+        
+      self.sha(group1, "0")
+      self.sha(group2, "1")
 
   def sha(self, iterable, c):
     print("*_*")
     rv = None
-    if len(iterable) == 1: return rv
+    if len(iterable) == 1:
+      self.code.append(c)
+      print("[C): ", c)
+      return
     half = round(sum(iterable) / 2)
     print("h:", half)
     print("I: ", iterable)
-    group1=group2=0
     diff1=diff2=diff3=0
     for index in range(len(iterable)-2):
       group1 = iterable[:index+1]
@@ -70,26 +62,26 @@ class shannon():
       if sum1 >= half:
         break
 
-    rv = (group1, group2)
-    if rv:
-      sha(group1, c+"0")
-      sha(group2, c+"1")
+      self.sha(group1, c+"0")
+      self.sha(group2, c+"1")
     else:
-      print(self.code)
-    return rv
+      print(c)
+      print("[C]: ", c)
     
+def main():
 
+  print('Hello, world!')
 
+  l = [1/2, 1/4, 1/8, 1/16, 1/32, 1/64, 1/64]
+  anita = [6/15, 2/15, 2/15, 2/15, 2/15, 1/15]
+  anita2 = [6, 2, 2, 2, 2, 1]
+  d = {"a":6, "i":2, "l":2, "n":3, "t":2, "v":1}
+  
+  #print(sum(anita2))
+  #print(shannon(anita2))
+  w = shannon(d)
+  w.shanon_start()
+  print("CODIGO: ", w.code)
 
-print('Hello, world!')
-
-l = [1/2, 1/4, 1/8, 1/16, 1/32, 1/64, 1/64]
-anita = [6/15, 2/15, 2/15, 2/15, 2/15, 1/15]
-anita2 = [6, 2, 2, 2, 2, 1]
-d = {"a":6, "i":2, "l":2, "n":3, "t":2, "v":1}
-
-#print(sum(anita2))
-#print(shannon(anita2))
-w = shannon(d)
-w.shanon_start()
-print(w.code)
+if __name__ == "__main__":
+  main()
