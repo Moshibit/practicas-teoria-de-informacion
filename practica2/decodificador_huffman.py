@@ -166,10 +166,10 @@ def main():
 
     # *** Entrada:
     # TODO: elimina las siguientes 2 líneas y descomenta la tercera y cuarta.
-    input_file = r"test10.huff"
+    # input_file = r"test10.huff"
     # input_file = r"test10.jpg"
-    # args = arguments_parser()
-    # input_file = str(args.file_name)
+    args = arguments_parser()
+    input_file = str(args.file_name)
 
     # *** decodificación del archivo
     o_huffman = Huffman(input_file)
