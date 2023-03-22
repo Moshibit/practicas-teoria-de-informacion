@@ -8,6 +8,7 @@ class shannon():
   def shanon_start(self):
     print("***")
     iterable=list(self.d.values())
+    print("I: ", iterable)
     rv = None
     if len(iterable) == 2:
       self.code.append("0")
@@ -18,7 +19,7 @@ class shannon():
       
     half = round(sum(iterable) / 2)
     print("h:", half)
-    print("I: ", iterable)
+
     diff1=diff2=diff3=0
     for index in range(len(iterable)-2):
       group1 = iterable[:index+1]
@@ -39,14 +40,18 @@ class shannon():
 
   def sha(self, iterable, c):
     print("*_*")
-    rv = None
+    print("i: ", iterable)
     if len(iterable) == 1:
       self.code.append(c)
       print("[C): ", c)
       return
+    if len(iterable) == 2:
+      self.sha(iterable[:1], c+"0")
+      self.sha(iterable[1:], c+"1")
+      return
+      
     half = round(sum(iterable) / 2)
     print("h:", half)
-    print("I: ", iterable)
     diff1=diff2=diff3=0
     for index in range(len(iterable)-2):
       group1 = iterable[:index+1]
@@ -61,12 +66,10 @@ class shannon():
       print("-------------------")
       if sum1 >= half:
         break
+      
+    self.sha(group1, c+"0")
+    self.sha(group2, c+"1")
 
-      self.sha(group1, c+"0")
-      self.sha(group2, c+"1")
-    else:
-      print(c)
-      print("[C]: ", c)
     
 def main():
 
@@ -76,7 +79,7 @@ def main():
   anita = [6/15, 2/15, 2/15, 2/15, 2/15, 1/15]
   anita2 = [6, 2, 2, 2, 2, 1]
   d = {"a":6, "i":2, "l":2, "n":3, "t":2, "v":1}
-  
+  #d = {"a":6, "i":2}
   #print(sum(anita2))
   #print(shannon(anita2))
   w = shannon(d)
