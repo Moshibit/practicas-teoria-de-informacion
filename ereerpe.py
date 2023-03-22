@@ -16,7 +16,7 @@ class shannon():
       self.code.append("0")
       self.code.append("1")
       return
-    half = ceil(sum(self.d.values() / 2)
+    half = ceil(sum(self.d.values()) / 2)
     #print("H:", half)
     for index in range(len(self.d)-1):
       #group1 = iterable[:index+1]
@@ -28,7 +28,7 @@ class shannon():
       diff1 = (sum1 - half)
       diff2 = (sum2 - half)
       if sum1 >= half:
-        #print("G:", group1, group2)
+        #print("G:", d1, d2)
         #print("S:", sum1, sum2)
         #print("D:", diff1, diff2)
         #print("====================")
@@ -37,38 +37,38 @@ class shannon():
     self.sha(d1, "0")
     self.sha(d2, "1")
 
-  def sha(self, iterable, c):
-    print("*_*")
-    print("i: ", iterable)
+  def sha(self, dict_, c):
+    #print("*_*")
+    #print("i: ", iterable)
     diff1=diff2=0
-    if len(iterable) == 1:
+    if len(dict_) == 1:
       self.code.append(c)
-      print("[c): ", c)
+      #print("[c): ", c)
       return
-    if len(iterable) == 2:
-      self.sha(iterable[:1], c+"0")
-      self.sha(iterable[1:], c+"1")
+    if len(dict_) == 2:
+      self.sha(dict(list(dict_.items())[:1]), c+"0")
+      self.sha(dict(list(dict_.items())[1:]), c+"1")
       return
       
-    half = ceil(sum(iterable) / 2)
-    print("h:", half)
-    for index in range(len(iterable)-1):
-      group1 = iterable[:index+1]
-      group2 = iterable[index+1:]
-      sum1 = sum(group1)
-      sum2 = sum(group2)
+    half = ceil(sum(dict_.values()) / 2)
+    #print("h:", half)
+    for index in range(len(dict_)-1):
+      d1 = dict(list(dict_.items())[:index+1])
+      d2 = dict(list(dict_.items())[index+1:])
+      sum1 = sum(d1.values())
+      sum2 = sum(d2.values())
       diff1 = (sum1 - half)
       diff2 = (sum2 - half)
 
       if sum1 >= half:
-        print("g:", group1, group2)
-        print("s", sum1, sum2)
-        print("d:", diff1, diff2)
-        print("-------------------")
+        #print("g:", d1, d2)
+        #print("s", sum1, sum2)
+        #print("d:", diff1, diff2)
+        #print("-------------------")
         break
       
-    self.sha(group1, c+"0")
-    self.sha(group2, c+"1")
+    self.sha(d1, c+"0")
+    self.sha(d2, c+"1")
 
     
 def main():
@@ -79,8 +79,8 @@ def main():
   anita = [6/15, 2/15, 2/15, 2/15, 2/15, 1/15]
   anita2 = [6, 2, 2, 2, 2, 1]
   d = {"a":6, "i":2, "l":2, "n":2, "t":2, "v":1}
-  d = sorted(d)
-
+  d = dict(sorted(d.items(), key=lambda item: item[1], reverse=True))
+  
   w = shannon(d)
   w.shanon_start()
   print("CODIGO: ", w.code)
