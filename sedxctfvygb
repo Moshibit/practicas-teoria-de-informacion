@@ -33,10 +33,8 @@ class LZA:
         symbol = ""
 
     self.code_dict = dict(zip(self.content, self.code_list))
-    self.code_dict = dict(zip(self.code_list, self.content))
+    self.decode_dict = dict(zip(self.code_list, self.content))
 
-    print(self.content)
-    print(self.code_list)
     print(self.code_dict)
     print(self.decode_dict)
 
