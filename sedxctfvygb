@@ -3,6 +3,8 @@ class LZA:
     self.bitstring = bitstring
     self.code_list = []
     self.content = []
+    self.code_dict = None
+    self.decode_dict = None
 
   def encode(self):
     self.__read_bin()
@@ -12,7 +14,6 @@ class LZA:
     symbol = ""
     prefix = None
     least = None
-    precode = None
     
     for char in self.bitstring:
       symbol += char
@@ -20,22 +21,24 @@ class LZA:
         self.content.append(symbol)
         least = symbol[-1]
         prefix = symbol[:-1]
-        print("l", least)
-        print("p", prefix)
+
         try:
-          prefix = bin(self.content.index(prefix))[2:]
+          prefix = bin(self.content.index(prefix) + 1)[2:]
         except ValueError:
-          prefix = ""
-        if prefix == "": prefix = "0" * (max_size - 1)
+          prefix = "0"
+        
+        prefix = "0" * (max_size - (len(prefix) + 1)) + prefix
         self.code_list.append(prefix + least)
         
-        
         symbol = ""
-        #prefix = None
-        
+
+    self.code_dict = dict(zip(self.content, self.code_list))
+    self.code_dict = dict(zip(self.code_list, self.content))
 
     print(self.content)
     print(self.code_list)
+    print(self.code_dict)
+    print(self.decode_dict)
 
     
     
