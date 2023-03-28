@@ -7,210 +7,137 @@
 # Implementar codificador y decodificador Lempel-Ziv con símbolos de longitud
 # fija de 16 bits.
 
-
 import argparse
 import os
 import pickle
 import time
 
-from math import ceil
-
-
-class Shannon:
-    """Codifica (comprime) un archivo binario en bloques de 16 bits."""
-
-    def __init__(self, path: str) -> None:
+class LZ:
+    """Pass"""
+    def __init__(self, path):
         self.path = path
-        self.file_name, self.ext = os.path.splitext(self.path)
-        self.out_fn = self.file_name + ".sha"
-        self.file_dict = self.file_name + "_sha.dict"
-        self.freq = {}
-        self.total_8 = 0
-        self.total_16 = 0
-        self.heap = []
-        self.code_dict = {}
-        self.decode_dict = {}
+        self.file_name , self.ext = os.path.splitext(self.path)
+        self.out_fn = self.file_name + ".lpz"
+        self.file_dict = self.file_name + "_huff.lpz"
+        self.max_size = 3 #4#16
+        self.code_dict = None
+        self.decode_dict = None
         self.padding = 0
-        self.padding_16 = None
+        self.coded_content = ""
 
     def compress(self):
-        """Hace la compresión"""
+        """Pass"""
         self.__read_input()
-        self.__get_code()
-        self.__encode()
         self.__pickle()
 
     def __read_input(self):
-        """Lee el archivo, cuenta las frecuencias de parejas debytes (2 hex),
-        uenta cuantos bytes tiene el archivo, y cuantas parejas de bytes
-        """
-        holder = None
-        symbol = None
+        symbol = ""
+        prefix = None
+        least = None
+        code_list = []
+        content = []
+        bitstring = ""
+        bitstring_debug = ""
+        to_remove = ""
+        #break_centinel = False
 
-        # forma el diccionario de frecuencias
         with open(self.path, "rb") as file:
-            for byte_ in file.read():
-                self.total_8 += 1
-                if self.total_8 % 2 != 0:
-                    holder = hex(byte_)
-                    continue
-                symbol = holder + "\\" + hex(byte_)
-                if not symbol in self.freq:
-                    self.freq[symbol] = 0
-                self.freq[symbol] += 1
-                self.total_16 += 1
-                # # DEBUG: ----------------------------------------------------
-                # if self.total_16 == 1:
-                #     print(f"el primer simbolo es: {symbol}")
-                # # DEBUG(FIN) ------------------------------------------------
+            for byte in file.read():
+                bin_byte = bin(byte)[2:]
+                if len(bin_byte) < 8:
+                    bin_byte = "0" * (8 - len(bin_byte)) + bin_byte
+                bitstring += bin_byte
+                bitstring_debug += bin_byte
 
-        # verifica que no se omitiera un simbolo
-        # le agrega paddin de ser necesario
-        if self.total_8 % 2 != 0:
-            symbol = holder + "\\" + hex(0)
-            if not symbol in self.freq:
-                self.freq[symbol] = 0
-            self.freq[symbol] += 1
-            self.total_16 += 1
-            self.padding_16 = symbol
-        # # DEBUG: ------------------------------------------------------------
-        # print(f"el último síbolo es: {symbol}")
-        # # DEBUG(FIN) --------------------------------------------------------
-        self.freq = dict(sorted(self.freq.items(), key=lambda item: item[1], reverse=True))
+                for char in bitstring:
+                    symbol += char
+                    if not symbol in content: # and len(content) < 2 ** self.max_size:
+                        least = symbol[-1]
+                        prefix = symbol[:-1]
 
-    def _print_freq(self):
-        """Imprime el diccionario de frecuencias, para uso de debug"""
-        print("FREQ DICT:")
-        for k, v in self.freq.items():
-            print(k, ":", v)
+                        try:
+                            code = bin(content.index(prefix) + 1)[2:]
+                            code += least
+                        except ValueError:
+                            code = least
 
-    def __get_code(self):
-        d = self.freq
-        if len(d) == 1:
-            k = list(d.keys())[0]
-            self.code_dict[k] = "1"
-            self.decode_dict["1"] = k
-            return
-        if len(d) == 2:
-            k = list(d.keys())
-            k1 = k[0]
-            k2 = k[1]
-            self.code_dict[k1] = "0"
-            self.code_dict[k2] = "1"
-            self.decode_dict["0"] = k1
-            self.decode_dict["1"] = k2
-            return
-        half = ceil(sum(d.values()) / 2)
-        for index in range(len(d)-1):
-            d1 = dict(list(d.items())[:index+1])
-            d2 = dict(list(d.items())[index+1:])
-            sum1 = sum(d1.values())
-            sum2 = sum(d2.values())
-            diff1 = (sum1 - half)
-            diff2 = (sum2 - half)
-            if sum1 >= half:
-                break
+                        if len(code) <= self.max_size:
 
-        self.__recursive_encode(d1, "0")
-        self.__recursive_encode(d2, "1")
+                            content.append(symbol)
+                            code_list.append(code) # code_list.append(int(prefix + least, 2))
+                            self.coded_content += code + " " # TODO quitar esl espacio
+                        else:
+                            code = symbol[:-1]
+                            symbol = symbol[-1]
+                            self.coded_content += bin(content.index(code) + 1)[2:] + "_" # TODO quitar esl guin bajo
+                            continue
+                        
+                        
+                        print(symbol) # DEBUG
+                        to_remove += symbol
+                        symbol = ""
+                    # elif: #len(symbol) == self.max_size:
+                    #     # TODO escribe en el archivo de salida - busca el valor en
+                    #     code = bin(content.index(symbol) + 1)[2:]
+                    #                                                     #X if len(code) < self.max_size:
+                    #                                                     #X     code = "0" * (8 - self.max_size) + code     
+                    #     #append
+                    #     self.coded_content += code + "_" # TODO quitar el guion bajo
+
+                    #     to_remove += symbol
+                    #     symbol = ""
+                        
+                    #     continue
+                        
+                # if break_centinel:
+                #     break
+
+                
+
+                bitstring = bitstring.partition("to_remove")[2]
+                to_remove = ""
+
+            # TODO agregar el sobrannte al terminar el 
+
+            # if len(symbol) % 8 != 0:
+            #     self.padding = 8 - len(symbol)
+            #     symbol = symbol + "0" * self.padding
 
 
-    def __recursive_encode(self, dict_, c):
-        diff1 = diff2 = 0
-        if len(dict_) == 1:
-            k = list(dict_.keys())[0]
-            self.code_dict[k] = c
-            self.decode_dict[c] = k
-            return
-        if len(dict_) == 2:
-            self.__recursive_encode(dict(list(dict_.items())[:1]), c+"0")
-            self.__recursive_encode(dict(list(dict_.items())[1:]), c+"1")
-            return
+        self.code_dict = dict(zip(content, code_list))
+        self.decode_dict = dict(zip(code_list, content))
 
-        half = ceil(sum(dict_.values()) / 2)
-        for index in range(len(dict_)-1):
-            d1 = dict(list(dict_.items())[:index+1])
-            d2 = dict(list(dict_.items())[index+1:])
-            sum1 = sum(d1.values())
-            sum2 = sum(d2.values())
-            diff1 = (sum1 - half)
-            diff2 = (sum2 - half)
-
-            if sum1 >= half:
-                break
-
-        self.__recursive_encode(d1, c+"0")
-        self.__recursive_encode(d2, c+"1")
-
-
-    def __encode(self):
-        holder = None
-        symbol = None
-        byte_counter = 0  # Cuenta los bytes del archivo de lectura
-        byte_str = ""  # los bit a ser puesto en le archvio de escritura
-        with open(self.path, "rb") as file, open(self.out_fn, "wb") as out_file:
-            for byte_ in file.read():
-                byte_output = bytearray()
-                byte_counter += 1
-                if byte_counter % 2 != 0:
-                    holder = hex(byte_)
-                    continue
-                symbol = holder + "\\" + hex(byte_)
-                byte_str += self.code_dict[symbol]
-                while len(byte_str) >= 8:
-                    byte_output.append(int(byte_str[:8], 2))
-                    byte_str = byte_str[8:]
-                out_file.write(byte_output)
-
-        # verifica que no falte por formar una pareja
-        if self.total_8 % 2 != 0:
-            byte_output = bytearray()  # <-----
-            symbol = holder + "\\" + hex(0)
-            byte_str += self.code_dict[symbol]
-            while len(byte_str) >= 8:
-                byte_output.append(int(byte_str[:8], 2))
-                byte_str = byte_str[8:]
-            with open(self.out_fn, "ab") as out_file:
-                out_file.write(byte_output)
-
-        # agrega el padding
-        if len(byte_str) < 8:
-            byte_output = bytearray()  # <-----
-            self.padding = 8 - len(byte_str)
-            byte_str = byte_str + "0" * self.padding
-            byte_output.append(int(byte_str, 2))
-            with open(self.out_fn, "ab") as out_file:
-                out_file.write(byte_output)
-
-    def _print_code(self):
-        """Imprime el diccionario del código, para uso de debug"""
-        for k, v in self.code_dict.items():
-            print(k, ":", v)
+        print("ultimo simbolo", symbol)
+        #print(self.code_dict)
+        #print(self.decode_dict)
+        
+        print(len(self.code_dict))
+        print(bitstring)
+        print(len(bitstring))
+        print(bitstring_debug)
+        print(len(bitstring_debug))
+        for k,v in self.code_dict.items():
+            print(f"{k:16}",":",v)
 
     def __pickle(self):
         """Serializa el diccionario [codigo: símbolo] y la extención del 
         archivo original, para que se puedan llevar al script de decodificación
         y esa información se pueda recuperar.
         """
-        # [str, int, str, dict[str: str]
+        #[str, int, dict[str: str]
         # 0: la extención original
         # 1: numero de ceros agregados al bytearray
-        # 2: último par de hexadecimales con padding, si no se agrego paddding es None
-        # 3: total de símbolos a decodificar
-        # 4: el diccionaraio para decodificar
-        serial = [self.ext, self.padding, self.padding_16,
-                  self.total_16, self.decode_dict]
+        # 2: el diccionaraio para decodificar
+        serial = [self.ext, self.padding, self.decode_dict]
         with open(self.file_dict, 'wb') as file:
             pickle.dump(serial, file)
-
 
 def arguments_parser():
     """Recive el nombre del archivo a comprimir como argumento desde la línea 
     de mandos.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("file_name", type=str, default=None,
-                        help="Nombre del archivo a comprimir.")
+    parser.add_argument("file_name", type=str, default=None, help="Nombre del archivo a comprimir.")
     args = parser.parse_args()
     return args
 
@@ -224,73 +151,26 @@ def main():
 
     # *** Entrada:
     # TODO: elimina las siguientes 2 líneas y descomenta la tercera y cuarta.
-    # input_file = r"test3.bin"
-    # input_file = r"test10.jpg"
-    args = arguments_parser()
-    input_file = str(args.file_name)
+    input_file = r"test3.bin"
+    # input_file = r"test15.bin"
+    #input_file = r"test10.jpg"
+    #args = arguments_parser()
+    #input_file = str(args.file_name)
+    #b = "010110100101"
 
     # *** Codificación del archivo
-    o_shannon = Shannon(input_file)
-    o_shannon.compress()
+
+    o_lz = LZ(input_file) #(b)
+    o_lz.compress()
+    print("--->", o_lz.coded_content)
 
     # *** Cálculo de tiempo de ejecución:
     end_time = time.time()
-    elapsed_time = (end_time - start_time)  # * (10**3)
+    elapsed_time = (end_time - start_time)# * (10**3)
     print(f"Tiempo de ejecución: {elapsed_time:.4f}s.")
-
-    # # DEBUG: ----------------------------------------------------------------
-    # print(vars(o_shannon))
-    # print("-------------------------")
-    # print(o_shannon.freq)
-    # print(o_shannon.code_dict)
-    # print("-------------------------")
-    # o_shannon.
-    # # -----------------------------------------------------------------------
 
     print("Done.")
 
 
 if __name__ == "__main__":
     main()
-
-
-# def find_middle(lst):
-#   if len(lst) == 1: return None
-#   s = k = b = 0
-#   for p in lst: s += p
-#   s /= 2
-#   for p in range(len(lst)):
-#     k += lst[p]
-#     if k == s: return p
-#     elif k > s:
-#       j = len(lst) - 1
-#       while b < s:
-#         b += lst[j]
-#         j -= 1
-#       return p if abs(s - k) < abs(s - b) else j
-#   return
-
-# def shannon(iterable):
-#   if len(iterable) == 1: return None
-#   half = round(sum(iterable) / 2)
-#   print(half)
-#   group1=group2=0
-#   diff1=diff2=0
-#   for index in range(len(iterable)-2):
-#     group1 = sum(iterable[:index+1])
-#     group2 = sum(iterable[:index+2])
-#     diff1 = gru
-
-
-# print('Hello, world!')
-
-# l = [1/2, 1/4, 1/8, 1/16, 1/32, 1/64, 1/64]
-# anita = [6/15, 2/15, 2/15, 2/15, 2/15, 1/15]
-# anita2 = [6, 2, 2, 2, 2, 1]
-
-# i=4
-# print("grupo1:", sum(anita2[:i+1]))
-# print("grupo2:", sum(anita2[:i+2]))
-
-# print(sum(anita2))
-# print(shannon(anita2))
