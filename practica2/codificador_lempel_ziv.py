@@ -19,11 +19,12 @@ class LZ:
         self.file_name , self.ext = os.path.splitext(self.path)
         self.out_fn = self.file_name + ".lpz"
         self.file_dict = self.file_name + "_huff.lpz"
-        self.max_size = 3 #4#16
+        self.max_size = 16 #4#16
         self.code_dict = None
         self.decode_dict = None
-        self.padding = 0
+        self.padding = 2 # TODO poner en cero por cuestiones de debug es ahora 2
         self.coded_content = ""
+        self.numberof_hex = 3 # DEBUG
 
     def compress(self):
         """Pass"""
@@ -39,15 +40,21 @@ class LZ:
         bitstring = ""
         bitstring_debug = ""
         to_remove = ""
+        count_hex = 0 # DEBUG
         #break_centinel = False
 
         with open(self.path, "rb") as file:
             for byte in file.read():
+                count_hex += 1
                 bin_byte = bin(byte)[2:]
                 if len(bin_byte) < 8:
                     bin_byte = "0" * (8 - len(bin_byte)) + bin_byte
                 bitstring += bin_byte
                 bitstring_debug += bin_byte
+
+                if count_hex == self.numberof_hex:
+                    bitstring = bitstring[:-2]
+                    bitstring_debug = bitstring_debug[:-2]
 
                 for char in bitstring:
                     symbol += char
@@ -97,17 +104,14 @@ class LZ:
                 bitstring = bitstring.partition("to_remove")[2]
                 to_remove = ""
 
+            print("ultimo simbolo", symbol)
             # TODO agregar el sobrannte al terminar el 
-
-            # if len(symbol) % 8 != 0:
-            #     self.padding = 8 - len(symbol)
-            #     symbol = symbol + "0" * self.padding
-
-
+            code = symbol
+            self.coded_content += bin(content.index(code) + 1)[2:] + "F" # TODO quitar esl "F"
+            
         self.code_dict = dict(zip(content, code_list))
         self.decode_dict = dict(zip(code_list, content))
-
-        print("ultimo simbolo", symbol)
+        
         #print(self.code_dict)
         #print(self.decode_dict)
         
@@ -151,7 +155,7 @@ def main():
 
     # *** Entrada:
     # TODO: elimina las siguientes 2 líneas y descomenta la tercera y cuarta.
-    input_file = r"test3.bin"
+    input_file = r"test20.bin"
     # input_file = r"test15.bin"
     #input_file = r"test10.jpg"
     #args = arguments_parser()
