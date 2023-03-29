@@ -45,7 +45,7 @@ class LZ:
         #break_centinel = False
         
 
-        with open(self.path, "rb") as file:
+        with open(self.path, "rb") as file, open(self.out_fn, "wb") as out_file:
             for byte in file.read():
                 count_hex += 1 # DEBUG
                 bin_byte = bin(byte)[2:]
