@@ -177,4 +177,16 @@ def main():
 
 
 if __name__ == "__main__":
+    contenido = "001011101001011101101100"
+    NOMBRE_ARCHIVO = r"test20.bin"
+    byte_output = bytearray()
+    print("Beggin...")
+    with open(NOMBRE_ARCHIVO, "wb") as file:
+        while len(contenido) >= 8:
+            byte_output.append(int(contenido[:8], 2))
+            contenido = contenido[8:]
+        file.write(byte_output)
+    print("End.")
+
+
     main()
