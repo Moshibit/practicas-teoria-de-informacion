@@ -43,19 +43,20 @@ class LZ:
         to_remove = ""
         count_hex = 0 # DEBUG
         #break_centinel = False
+        
 
         with open(self.path, "rb") as file:
             for byte in file.read():
-                count_hex += 1
+                count_hex += 1 # DEBUG
                 bin_byte = bin(byte)[2:]
                 if len(bin_byte) < 8:
                     bin_byte = "0" * (8 - len(bin_byte)) + bin_byte
                 bitstring += bin_byte
                 bitstring_debug += bin_byte
 
-                # if count_hex == self.numberof_hex:
-                #     bitstring = bitstring[:-2]
-                #     bitstring_debug = bitstring_debug[:-2]
+                if count_hex == 3:
+                    bitstring = bitstring[:-2]
+                    bitstring_debug = bitstring_debug[:-2]
 
                 for char in bitstring:
                     symbol += char
@@ -106,12 +107,12 @@ class LZ:
                 bitstring = bitstring.partition("to_remove")[2]
                 to_remove = ""
 
-            # print("ultimo simbolo", symbol)
-
-            code = symbol
-            #self.coded_content += bin(content.index(code) + 1)[2:] + "F" # TODO quitar esl "F"
-            code = content.index(code)
-            self.coded_content += code_list[code]  + "F"
+            print("ultimo simbolo", symbol)
+            if len(symbol) > 0:
+                code = symbol
+                #self.coded_content += bin(content.index(code) + 1)[2:] + "F" # TODO quitar esl "F"
+                code = content.index(code)
+                self.coded_content += code_list[code]  + "F"
             
         self.code_dict = dict(zip(content, code_list))
         self.decode_dict = dict(zip(code_list, content))
@@ -136,7 +137,7 @@ class LZ:
         # 0: la extención original
         # 1: numero de ceros agregados al bytearray
         # 2: el diccionaraio para decodificar
-        serial = [self.ext, self.padding, self.decode_dict]
+        serial = [self.ext, self.decode_dict]
         with open(self.file_dict, 'wb') as file:
             pickle.dump(serial, file)
 
