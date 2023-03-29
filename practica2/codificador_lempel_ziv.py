@@ -22,9 +22,10 @@ class LZ:
         self.max_size = 16 #4#16
         self.code_dict = None
         self.decode_dict = None
-        self.padding = 2 # TODO poner en cero por cuestiones de debug es ahora 2
         self.coded_content = ""
-        self.numberof_hex = 3 # DEBUG
+
+        # self.padding = 2 # TODO poner en cero por cuestiones de debug es ahora 2
+        # self.numberof_hex = 3 # DEBUG
 
     def compress(self):
         """Pass"""
@@ -52,9 +53,9 @@ class LZ:
                 bitstring += bin_byte
                 bitstring_debug += bin_byte
 
-                if count_hex == self.numberof_hex:
-                    bitstring = bitstring[:-2]
-                    bitstring_debug = bitstring_debug[:-2]
+                # if count_hex == self.numberof_hex:
+                #     bitstring = bitstring[:-2]
+                #     bitstring_debug = bitstring_debug[:-2]
 
                 for char in bitstring:
                     symbol += char
@@ -76,11 +77,12 @@ class LZ:
                         else:
                             code = symbol[:-1]
                             symbol = symbol[-1]
-                            self.coded_content += bin(content.index(code) + 1)[2:] + "_" # TODO quitar esl guin bajo
+                            code = content.index(code)
+                            self.coded_content += code_list[code]  + "_" # TODO quitar esl guin bajo
                             continue
                         
                         
-                        print(symbol) # DEBUG
+                        # print(symbol) # DEBUG
                         to_remove += symbol
                         symbol = ""
                     # elif: #len(symbol) == self.max_size:
@@ -104,10 +106,12 @@ class LZ:
                 bitstring = bitstring.partition("to_remove")[2]
                 to_remove = ""
 
-            print("ultimo simbolo", symbol)
-            # TODO agregar el sobrannte al terminar el 
+            # print("ultimo simbolo", symbol)
+
             code = symbol
-            self.coded_content += bin(content.index(code) + 1)[2:] + "F" # TODO quitar esl "F"
+            #self.coded_content += bin(content.index(code) + 1)[2:] + "F" # TODO quitar esl "F"
+            code = content.index(code)
+            self.coded_content += code_list[code]  + "F"
             
         self.code_dict = dict(zip(content, code_list))
         self.decode_dict = dict(zip(code_list, content))
@@ -115,11 +119,11 @@ class LZ:
         #print(self.code_dict)
         #print(self.decode_dict)
         
-        print(len(self.code_dict))
-        print(bitstring)
-        print(len(bitstring))
-        print(bitstring_debug)
-        print(len(bitstring_debug))
+        # print(len(self.code_dict))
+        # print(bitstring)
+        # print(len(bitstring))
+        # print(bitstring_debug)
+        # print(len(bitstring_debug))
         for k,v in self.code_dict.items():
             print(f"{k:16}",":",v)
 
@@ -166,7 +170,7 @@ def main():
 
     o_lz = LZ(input_file) #(b)
     o_lz.compress()
-    print("--->", o_lz.coded_content)
+    print("--->", o_lz.coded_content) # TODO grabar en archivo
 
     # *** Cálculo de tiempo de ejecución:
     end_time = time.time()
@@ -177,16 +181,16 @@ def main():
 
 
 if __name__ == "__main__":
-    contenido = "001011101001011101101100"
-    NOMBRE_ARCHIVO = r"test20.bin"
-    byte_output = bytearray()
-    print("Beggin...")
-    with open(NOMBRE_ARCHIVO, "wb") as file:
-        while len(contenido) >= 8:
-            byte_output.append(int(contenido[:8], 2))
-            contenido = contenido[8:]
-        file.write(byte_output)
-    print("End.")
+    # contenido = "001011101001011101101100"
+    # NOMBRE_ARCHIVO = r"test20.bin"
+    # byte_output = bytearray()
+    # print("Beggin...")
+    # with open(NOMBRE_ARCHIVO, "wb") as file:
+    #     while len(contenido) >= 8:
+    #         byte_output.append(int(contenido[:8], 2))
+    #         contenido = contenido[8:]
+    #     file.write(byte_output)
+    # print("End.")
 
 
     main()
