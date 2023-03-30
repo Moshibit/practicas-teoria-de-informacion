@@ -23,6 +23,7 @@ class LZ:
         self.code_dict = None
         self.decode_dict = None
         self.coded_content = ""
+        self.padding = 0
 
         # self.padding = 2 # TODO poner en cero por cuestiones de debug es ahora 2
         # self.numberof_hex = 3 # DEBUG
@@ -42,7 +43,7 @@ class LZ:
         bitstring_debug = ""
         to_remove = ""
         count_hex = 0 # DEBUG
-        #break_centinel = False
+        byte_output = bytearray()
         
 
         with open(self.path, "rb") as file, open(self.out_fn, "wb") as out_file:
@@ -71,38 +72,22 @@ class LZ:
                             code = least
 
                         if len(code) <= self.max_size:
-
                             content.append(symbol)
                             code_list.append(code) # code_list.append(int(prefix + least, 2))
-                            self.coded_content += code + " " # TODO quitar esl espacio
+                            self.coded_content += code
                         else:
                             code = symbol[:-1]
                             symbol = symbol[-1]
                             code = content.index(code)
-                            self.coded_content += code_list[code]  + "_" # TODO quitar esl guin bajo
+                            self.coded_content += code_list[code]
                             continue
-                        
-                        
+                                                   
+                        while len(self.coded_content) >= 8:
+                            byte_output.append(int(self.coded_content[:8], 2))
+                            self.coded_content = self.coded_content[8:]
                         # print(symbol) # DEBUG
                         to_remove += symbol
                         symbol = ""
-                    # elif: #len(symbol) == self.max_size:
-                    #     # TODO escribe en el archivo de salida - busca el valor en
-                    #     code = bin(content.index(symbol) + 1)[2:]
-                    #                                                     #X if len(code) < self.max_size:
-                    #                                                     #X     code = "0" * (8 - self.max_size) + code     
-                    #     #append
-                    #     self.coded_content += code + "_" # TODO quitar el guion bajo
-
-                    #     to_remove += symbol
-                    #     symbol = ""
-                        
-                    #     continue
-                        
-                # if break_centinel:
-                #     break
-
-                
 
                 bitstring = bitstring.partition("to_remove")[2]
                 to_remove = ""
@@ -112,8 +97,14 @@ class LZ:
                 code = symbol
                 #self.coded_content += bin(content.index(code) + 1)[2:] + "F" # TODO quitar esl "F"
                 code = content.index(code)
-                self.coded_content += code_list[code]  + "F"
+                self.coded_content += code_list[code]
+
+            if len(self.coded_content) < 8:
+                self.coded_content = self.coded_content + ((8 - len(self.coded_content)) * "0")
+                byte_output.append(int(self.coded_content[:8], 2))
             
+            out_file.write(byte_output)
+
         self.code_dict = dict(zip(content, code_list))
         self.decode_dict = dict(zip(code_list, content))
         
@@ -137,7 +128,7 @@ class LZ:
         # 0: la extención original
         # 1: numero de ceros agregados al bytearray
         # 2: el diccionaraio para decodificar
-        serial = [self.ext, self.decode_dict]
+        serial = [self.ext, self.padding, self.decode_dict]
         with open(self.file_dict, 'wb') as file:
             pickle.dump(serial, file)
 
@@ -159,19 +150,19 @@ def main():
     start_time = time.time()
 
     # *** Entrada:
-    # TODO: elimina las siguientes 2 líneas y descomenta la tercera y cuarta.
-    input_file = r"test20.bin"
+    # : elimina las siguientes 2 líneas y descomenta la tercera y cuarta.
+    # input_file = r"test3.bin"
     # input_file = r"test15.bin"
     #input_file = r"test10.jpg"
-    #args = arguments_parser()
-    #input_file = str(args.file_name)
+    args = arguments_parser()
+    input_file = str(args.file_name)
     #b = "010110100101"
 
     # *** Codificación del archivo
 
     o_lz = LZ(input_file) #(b)
     o_lz.compress()
-    print("--->", o_lz.coded_content) # TODO grabar en archivo
+    # print("--->", o_lz.coded_content) 
 
     # *** Cálculo de tiempo de ejecución:
     end_time = time.time()
