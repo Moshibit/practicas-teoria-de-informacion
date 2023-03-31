@@ -18,7 +18,7 @@ class LZ:
         self.path = path
         self.file_name , self.ext = os.path.splitext(self.path)
         self.out_fn = self.file_name + ".lpz"
-        self.file_dict = self.file_name + "_huff.lpz"
+        self.file_dict = self.file_name + "_lpz.dict"
         self.max_size = 16 #4#16
         self.code_dict = None
         self.decode_dict = None
@@ -73,7 +73,8 @@ class LZ:
 
                         if len(code) <= self.max_size:
                             content.append(symbol)
-                            code_list.append(code) # code_list.append(int(prefix + least, 2))
+                            code = ((self.max_size - len(code)) * "0") + code
+                            code_list.append(code)
                             self.coded_content += code
                         else:
                             code = symbol[:-1]
@@ -162,7 +163,7 @@ def main():
 
     o_lz = LZ(input_file) #(b)
     o_lz.compress()
-    # print("--->", o_lz.coded_content) 
+    # print("--->", o_lz.coded_content)
 
     # *** Cálculo de tiempo de ejecución:
     end_time = time.time()
