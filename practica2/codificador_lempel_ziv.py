@@ -93,15 +93,17 @@ class LZ:
                 bitstring = bitstring.partition("to_remove")[2]
                 to_remove = ""
 
-            print("ultimo simbolo", symbol)
+            # print("ultimo simbolo", symbol)
             if len(symbol) > 0:
                 code = symbol
                 #self.coded_content += bin(content.index(code) + 1)[2:] + "F" # TODO quitar esl "F"
                 code = content.index(code)
                 self.coded_content += code_list[code]
 
-            if len(self.coded_content) < 8:
-                self.coded_content = self.coded_content + ((8 - len(self.coded_content)) * "0")
+            # agrega padding al final para completar 8 bits
+            if len(self.coded_content) % 8 != 0:
+                self.padding = 8 - len(self.coded_content)
+                self.coded_content = self.coded_content + (self.padding * "0")
                 byte_output.append(int(self.coded_content[:8], 2))
             
             out_file.write(byte_output)
@@ -117,8 +119,8 @@ class LZ:
         # print(len(bitstring))
         # print(bitstring_debug)
         # print(len(bitstring_debug))
-        for k,v in self.code_dict.items():
-            print(f"{k:16}",":",v)
+        # for k,v in self.code_dict.items():
+        #     print(f"{k:16}",":",v)
 
     def __pickle(self):
         """Serializa el diccionario [codigo: símbolo] y la extención del 
@@ -164,6 +166,7 @@ def main():
     o_lz = LZ(input_file) #(b)
     o_lz.compress()
     # print("--->", o_lz.coded_content)
+    # print("PADDING", o_lz.padding) # <--- TODO DEBUG
 
     # *** Cálculo de tiempo de ejecución:
     end_time = time.time()
