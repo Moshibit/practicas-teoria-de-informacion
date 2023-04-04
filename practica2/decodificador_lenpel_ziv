@@ -99,10 +99,10 @@ class Huffman:
                     bin_code = bin_code[8:]
 
             # agrega padding al final para completar 8 bits
-            if len(self.bin_code) % 8 != 0:
-                self.padding = 8 - len(self.bin_code)
-                self.bin_code = self.bin_code + (self.padding * "0")
-                byte_output.append(int(self.bin_code[:8], 2))
+            if len(bin_code) % 8 != 0:
+                padding = 8 - len(bin_code)
+                bin_code = bin_code + (padding * "0")
+                byte_output.append(int(bin_code, 2))
 
             out_file.write(byte_output)
 
@@ -163,7 +163,7 @@ class Huffman:
         self.padding = obj[1]
         self.decode_dict = obj[2]
 
-        self.out_fn = self.file_name + "_sha_decompressed" + self.ext
+        self.out_fn = self.file_name + "_lpz_decompressed" + self.ext
 
 
 
