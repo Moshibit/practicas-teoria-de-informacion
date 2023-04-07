@@ -1,26 +1,40 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-""" Codififador Huffman """
-# Implementar el codificador y decodificador Huffman y Shannon-Fano donde cada 
-# símbolo a codificar desde un archivo en binario es de 16 bits,
-# a
-# Implementar codificador y decodificador Lempel-Ziv con símbolos de longitud
-# fija de 16 bits.
+"""
+Título: Práctica 2 - Codififador Huffman.
+Descripción: Implementar el codificador Huffman donde cada símbolo a codificar
+             desde un archivo en binario es de 16 bits
+Autor: Erik Juárez Guerrero
+Fecha de creación: 17 de marzo 2023
+Última fecha de edición: 1 de abril 2023
+Entrada: nombre de un archivo binario introdido por linea de mandos:
+        'romeo y julieta.txt', 'romeo and juliet.txt' y 'romeo et juliette.txt'
+Salida: Genera dos archivos:
+        * archivo codificado con extención ".huff"
+        * archivo que contiene el diccionario para decodificar el archivo 
+          con extención ".dict"
+Como usar: introducir en la consola o simbolo de sistema la instrucción:
+           
+           $ python .\codificador_huffman.py .\[nombre_de_archivo]
+"""
 
-
+# Modulos Paquetes Bibliotecas
+# ----------------------------
 import argparse
 import heapq
 import os
 import pickle
 import time
 
-
+# Clases
+# ------
 class Huffman:
     """Codifica (comprime) un archivo binario en bloques de 16 bits."""
 
     class Node:
-        """clase anidada: Nodo..."""
-        def __init__(self, symbol, freq):
+        """clase anidada: Nodo del árbol binario."""
+
+        def __init__(self, symbol: str, freq) -> None:
             self.symbol = symbol
             self.freq = freq
             self.left = None
@@ -41,7 +55,7 @@ class Huffman:
 
     def __init__(self, path: str) -> None:
         self.path = path
-        self.file_name , self.ext = os.path.splitext(self.path)
+        self.file_name, self.ext = os.path.splitext(self.path)
         self.out_fn = self.file_name + ".huff"
         self.file_dict = self.file_name + "_huff.dict"
         self.freq = {}
@@ -53,8 +67,8 @@ class Huffman:
         self.padding = 0
         self.padding_16 = None
 
-    def compress(self):
-        """Hace la compresión"""
+    def compress(self) -> None:
+        """Hace la compresió.n"""
         self.__read_input()
         self.__heap()
         self.__tree()
@@ -62,12 +76,12 @@ class Huffman:
         self.__encode()
         self.__pickle()
 
-    def __read_input(self):
+    def __read_input(self) -> None:
         """Lee el archivo, cuenta las frecuencias de parejas debytes (2 hex),
         uenta cuantos bytes tiene el archivo, y cuantas parejas de bytes
         """
-        holder = None
-        symbol = None
+        holder: str  = ""
+        symbol: str = ""
 
         # forma el diccionario de frecuencias
         with open(self.path, "rb") as file:
@@ -81,10 +95,6 @@ class Huffman:
                     self.freq[symbol] = 0
                 self.freq[symbol] += 1
                 self.total_16 += 1
-                # # DEBUG: ----------------------------------------------------
-                # if self.total_16 == 1:
-                #     print(f"el primer simbolo es: {symbol}")
-                # # DEBUG(FIN) ------------------------------------------------
 
         # verifica que no se omitiera un simbolo
         # le agrega paddin de ser necesario
@@ -95,9 +105,6 @@ class Huffman:
             self.freq[symbol] += 1
             self.total_16 += 1
             self.padding_16 = symbol
-        # # DEBUG: ------------------------------------------------------------
-        # print(f"el último síbolo es: {symbol}")
-        # # DEBUG(FIN) --------------------------------------------------------
 
     def _print_freq(self):
         """Imprime el diccionario de frecuencias, para uso de debug"""
@@ -106,12 +113,13 @@ class Huffman:
             print(k, ":", v)
 
     def __heap(self) -> None:
-        """Forma el monticulo (heap)"""
+        """Forma el monticulo (heap)."""
         for key, value in self.freq.items():
             node = self.Node(key, value)
             heapq.heappush(self.heap, node)
 
     def __tree(self):
+        """Construye el árbol binario."""
         while len(self.heap) > 1:
             node1 = heapq.heappop(self.heap)
             node2 = heapq.heappop(self.heap)
@@ -123,6 +131,7 @@ class Huffman:
             heapq.heappush(self.heap, merged)
 
     def __get_code(self):
+        """Inicia la obtención del código Huffman."""
         root = heapq.heappop(self.heap)
         current_code = ""
         self.__recursive_encode(root, current_code)
@@ -138,6 +147,7 @@ class Huffman:
         self.__recursive_encode(root.right, current_code + "1")
 
     def __encode(self):
+        """Codifica el nuevo archivo con el código huffman"""
         holder = None
         symbol = None
         byte_counter = 0 # Cuenta los bytes del archivo de lectura
@@ -158,7 +168,7 @@ class Huffman:
 
         # verifica que no falte por formar una pareja
         if self.total_8 % 2 != 0:
-            byte_output = bytearray() # <-----
+            byte_output = bytearray()
             symbol = holder + "\\" + hex(0)
             byte_str += self.code_dict[symbol]
             while len(byte_str) >= 8:
@@ -170,7 +180,7 @@ class Huffman:
 
         # agrega el padding
         if len(byte_str) < 8:
-            byte_output = bytearray() # <-----
+            byte_output = bytearray()
             self.padding = 8 - len(byte_str)
             byte_str = byte_str + "0" * self.padding
             byte_output.append(int(byte_str, 2))
@@ -186,17 +196,21 @@ class Huffman:
         """Serializa el diccionario [codigo: símbolo] y la extención del 
         archivo original, para que se puedan llevar al script de decodificación
         y esa información se pueda recuperar.
+
+        [str, int, str, dict[str: str]
+        0: la extención original
+        1: numero de ceros agregados al bytearray
+        2: último par de hexadecimales con padding, si no se agrego paddding es None
+        3: total de símbolos a decodificar
+        4: el diccionaraio para decodificar
         """
-        #[str, int, str, dict[str: str]
-        # 0: la extención original
-        # 1: numero de ceros agregados al bytearray
-        # 2: último par de hexadecimales con padding, si no se agrego paddding es None
-        # 3: total de símbolos a decodificar
-        # 4: el diccionaraio para decodificar
+        
         serial = [self.ext, self.padding, self.padding_16, self.total_16, self.decode_dict]
         with open(self.file_dict, 'wb') as file:
             pickle.dump(serial, file)
 
+# Funciones
+# ---------
 
 def arguments_parser():
     """Recive el nombre del archivo a comprimir como argumento desde la línea 
@@ -207,37 +221,28 @@ def arguments_parser():
     args = parser.parse_args()
     return args
 
+# Función main
+# ------------
 
 def main():
     """ fucnón main"""
     print("Processing...")
 
-    # *** Tiempo de inicio
+    # Tiempo de inicio
     start_time = time.time()
 
-    # *** Entrada:
-    # TODO: elimina las siguientes 2 líneas y descomenta la tercera y cuarta.
-    # input_file = r"test3.bin"
-    # input_file = r"test10.jpg"
+    # Entrada:
     args = arguments_parser()
     input_file = str(args.file_name)
 
-    # *** Codificación del archivo
+    # Codificación del archivo
     o_huffman = Huffman(input_file)
     o_huffman.compress()
 
-    # *** Cálculo de tiempo de ejecución:
+    # Cálculo de tiempo de ejecución:
     end_time = time.time()
-    elapsed_time = (end_time - start_time)# * (10**3)
+    elapsed_time = (end_time - start_time)
     print(f"Tiempo de ejecución: {elapsed_time:.4f}s.")
-
-    # # DEBUG: ----------------------------------------------------------------
-    # print(vars(o_huffman))
-    # print("-------------------------")
-    # o_huffman._print_freq()
-    # print("-------------------------")
-    # o_huffman._print_code()
-    # # -----------------------------------------------------------------------
     
     print("Done.")
 
