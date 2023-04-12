@@ -8,7 +8,6 @@ Autor: Erik Juárez Guerrero
 Fecha de creación: 17 de marzo 2023
 Última fecha de edición: 1 de abril 2023
 Entrada: nombre de un archivo binario introdido por linea de mandos:
-        'romeo y julieta.txt', 'romeo and juliet.txt' y 'romeo et juliette.txt'
 Salida: Genera dos archivos:
         * archivo codificado con extención ".huff"
         * archivo que contiene el diccionario para decodificar el archivo 
@@ -68,7 +67,7 @@ class Huffman:
         self.padding_16 = None
 
     def compress(self) -> None:
-        """Hace la compresió.n"""
+        """Hace la compresión."""
         self.__read_input()
         self.__heap()
         self.__tree()
@@ -106,12 +105,6 @@ class Huffman:
             self.total_16 += 1
             self.padding_16 = symbol
 
-    def _print_freq(self):
-        """Imprime el diccionario de frecuencias, para uso de debug"""
-        print("FREQ DICT:")
-        for k, v in self.freq.items():
-            print(k, ":", v)
-
     def __heap(self) -> None:
         """Forma el monticulo (heap)."""
         for key, value in self.freq.items():
@@ -147,7 +140,7 @@ class Huffman:
         self.__recursive_encode(root.right, current_code + "1")
 
     def __encode(self):
-        """Codifica el nuevo archivo con el código huffman"""
+        """Codifica el nuevo archivo con el código huffman."""
         holder = None
         symbol = None
         byte_counter = 0 # Cuenta los bytes del archivo de lectura
@@ -166,7 +159,7 @@ class Huffman:
                     byte_str = byte_str[8:]
                 out_file.write(byte_output)
 
-        # verifica que no falte por formar una pareja
+        # verifica que no falte una pareja por formar
         if self.total_8 % 2 != 0:
             byte_output = bytearray()
             symbol = holder + "\\" + hex(0)
@@ -177,7 +170,6 @@ class Huffman:
             with open(self.out_fn, "ab") as out_file:
                 out_file.write(byte_output)
 
-
         # agrega el padding
         if len(byte_str) < 8:
             byte_output = bytearray()
@@ -187,10 +179,6 @@ class Huffman:
             with open(self.out_fn, "ab") as out_file:
                 out_file.write(byte_output)
 
-    def _print_code(self):
-        """Imprime el diccionario del código, para uso de debug"""
-        for k, v in self.code_dict.items():
-            print(k, ":", v)
 
     def __pickle(self):
         """Serializa el diccionario [codigo: símbolo] y la extención del 
@@ -204,14 +192,13 @@ class Huffman:
         3: total de símbolos a decodificar
         4: el diccionaraio para decodificar
         """
-        
         serial = [self.ext, self.padding, self.padding_16, self.total_16, self.decode_dict]
         with open(self.file_dict, 'wb') as file:
             pickle.dump(serial, file)
 
+
 # Funciones
 # ---------
-
 def arguments_parser():
     """Recive el nombre del archivo a comprimir como argumento desde la línea 
     de mandos.
@@ -221,11 +208,11 @@ def arguments_parser():
     args = parser.parse_args()
     return args
 
+
 # Función main
 # ------------
-
 def main():
-    """ fucnón main"""
+    """ fución main"""
     print("Processing...")
 
     # Tiempo de inicio
