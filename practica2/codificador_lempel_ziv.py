@@ -7,7 +7,7 @@ Descripción: Implementar el codificador Huffman donde cada símbolo tieneuna
 Autor: Erik Juárez Guerrero
 Fecha de creación: 17 de marzo 2023
 Última fecha de edición: 1 de abril 2023
-Entrada: nombre de un archivo binario introdido por linea de mandos:
+Entrada: nombre de un archivo binario introducido por línea de mandos:
 Salida: Genera dos archivos:
         * archivo codificado con extención ".lpz"
         * archivo que contiene el diccionario para decodificar el archivo 
