@@ -1,35 +1,44 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
-""" Codififador Huffman """
-# Implementar el codificador y decodificador Huffman y Shannon-Fano donde cada
-# símbolo a codificar desde un archivo en binario es de 16 bits,
-# a
-# Implementar codificador y decodificador Lempel-Ziv con símbolos de longitud
-# fija de 16 bits.
+"""
+Título: Práctica 2 - Codififador Lemoel.
+Descripción: Implementar el codificador Huffman donde cada símbolo tieneuna 
+             longitud de 16 bits
+Autor: Erik Juárez Guerrero
+Fecha de creación: 17 de marzo 2023
+Última fecha de edición: 1 de abril 2023
+Entrada: nombre de un archivo binario introdido por linea de mandos:
+Salida: Genera dos archivos:
+        * archivo codificado con extención ".lpz"
+        * archivo que contiene el diccionario para decodificar el archivo 
+          con extención ".dict"
+Como usar: introducir en la consola o simbolo de sistema la instrucción:
+           
+           $ python .\codificador_lempel_ziv.py .\[nombre_de_archivo]
+"""
 
+# Modulos Paquetes Bibliotecas
+# ----------------------------
 import argparse
 import os
 import pickle
 import time
 
 class LZ:
-    """Pass"""
+    """Codifica (comprime) un archivo binario"""
     def __init__(self, path):
         self.path = path
         self.file_name , self.ext = os.path.splitext(self.path)
         self.out_fn = self.file_name + ".lpz"
         self.file_dict = self.file_name + "_lpz.dict"
-        self.max_size = 16 #4#16
+        self.max_size = 16
         self.code_dict = None
         self.decode_dict = None
         self.coded_content = ""
         self.padding = 0
 
-        # self.padding = 2 # TODO poner en cero por cuestiones de debug es ahora 2
-        # self.numberof_hex = 3 # DEBUG
-
     def compress(self):
-        """Pass"""
+        """Hace la compresión."""
         self.__read_input()
         self.__pickle()
 
@@ -40,28 +49,24 @@ class LZ:
         code_list = []
         content = []
         bitstring = ""
-        bitstring_debug = ""
         to_remove = ""
-        count_hex = 0 # DEBUG
+        count_hex = 0
         byte_output = bytearray()
         
-
         with open(self.path, "rb") as file, open(self.out_fn, "wb") as out_file:
             for byte in file.read():
-                count_hex += 1 # DEBUG
+                count_hex += 1
                 bin_byte = bin(byte)[2:]
                 if len(bin_byte) < 8:
                     bin_byte = "0" * (8 - len(bin_byte)) + bin_byte
                 bitstring += bin_byte
-                bitstring_debug += bin_byte
 
                 if count_hex == 3:
                     bitstring = bitstring[:-2]
-                    bitstring_debug = bitstring_debug[:-2]
 
                 for char in bitstring:
                     symbol += char
-                    if not symbol in content: # and len(content) < 2 ** self.max_size:
+                    if not symbol in content:
                         least = symbol[-1]
                         prefix = symbol[:-1]
 
@@ -86,17 +91,14 @@ class LZ:
                         while len(self.coded_content) >= 8:
                             byte_output.append(int(self.coded_content[:8], 2))
                             self.coded_content = self.coded_content[8:]
-                        # print(symbol) # DEBUG
                         to_remove += symbol
                         symbol = ""
 
                 bitstring = bitstring.partition("to_remove")[2]
                 to_remove = ""
 
-            # print("ultimo simbolo", symbol)
             if len(symbol) > 0:
                 code = symbol
-                #self.coded_content += bin(content.index(code) + 1)[2:] + "F" # TODO quitar esl "F"
                 code = content.index(code)
                 self.coded_content += code_list[code]
 
@@ -110,27 +112,17 @@ class LZ:
 
         self.code_dict = dict(zip(content, code_list))
         self.decode_dict = dict(zip(code_list, content))
-        
-        #print(self.code_dict)
-        #print(self.decode_dict)
-        
-        # print(len(self.code_dict))
-        # print(bitstring)
-        # print(len(bitstring))
-        # print(bitstring_debug)
-        # print(len(bitstring_debug))
-        # for k,v in self.code_dict.items():
-        #     print(f"{k:16}",":",v)
 
     def __pickle(self):
         """Serializa el diccionario [codigo: símbolo] y la extención del 
         archivo original, para que se puedan llevar al script de decodificación
         y esa información se pueda recuperar.
+
+        [str, int, dict[str: str]
+        0: la extención original
+        1: numero de ceros agregados al bytearray
+        2: el diccionaraio para decodificar
         """
-        #[str, int, dict[str: str]
-        # 0: la extención original
-        # 1: numero de ceros agregados al bytearray
-        # 2: el diccionaraio para decodificar
         serial = [self.ext, self.padding, self.decode_dict]
         with open(self.file_dict, 'wb') as file:
             pickle.dump(serial, file)
@@ -145,48 +137,29 @@ def arguments_parser():
     return args
 
 
+# Función main
+# ------------
 def main():
-    """ fucnón main"""
+    """ fución main"""
     print("Processing...")
 
-    # *** Tiempo de inicio
+    # Tiempo de inicio
     start_time = time.time()
 
-    # *** Entrada:
-    # : elimina las siguientes 2 líneas y descomenta la tercera y cuarta.
-    # input_file = r"test3.bin"
-    # input_file = r"test15.bin"
-    #input_file = r"test10.jpg"
+    # Entrada:
     args = arguments_parser()
     input_file = str(args.file_name)
-    #b = "010110100101"
 
-    # *** Codificación del archivo
-
+    # Codificación del archivo
     o_lz = LZ(input_file) #(b)
     o_lz.compress()
-    # print("--->", o_lz.coded_content)
-    # print("PADDING", o_lz.padding) # <--- TODO DEBUG
 
-    # *** Cálculo de tiempo de ejecución:
+    # Cálculo de tiempo de ejecución:
     end_time = time.time()
     elapsed_time = (end_time - start_time)# * (10**3)
     print(f"Tiempo de ejecución: {elapsed_time:.4f}s.")
 
     print("Done.")
 
-
 if __name__ == "__main__":
-    # contenido = "001011101001011101101100"
-    # NOMBRE_ARCHIVO = r"test20.bin"
-    # byte_output = bytearray()
-    # print("Beggin...")
-    # with open(NOMBRE_ARCHIVO, "wb") as file:
-    #     while len(contenido) >= 8:
-    #         byte_output.append(int(contenido[:8], 2))
-    #         contenido = contenido[8:]
-    #     file.write(byte_output)
-    # print("End.")
-
-
     main()
