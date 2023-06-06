@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 """
-Título: Práctica 3 - XXXXXXX.
+Título: Práctica 3 - Códigos de redundancia cíclica.
 Descripción: 
 Entrada: 
 Salida: 
