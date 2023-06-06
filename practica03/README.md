@@ -13,14 +13,14 @@ Placeholder
 
 * Requiere instalar la biblioteca Pyserial
 ```console
-$ pip install pyserial
+pip install pyserial
 ```
 
 ## Dispositivos conectados el puerto serial
 
 Para identificar los dispositivos conectados se ejecuta en consola:
 ```console
-$ python -m serial.tools.list_ports
+python -m serial.tools.list_ports
 ```
 
 ## Como usar
