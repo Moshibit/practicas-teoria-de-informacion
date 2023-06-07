@@ -24,7 +24,7 @@ class MainWindow(Frame):
         self.master = master
         self.string_var = StringVar()
         self.crc_type = StringVar()
-        self.vector = StringVar()
+        self.init_vector = StringVar()
         self.pack()
         self.create_widgets()
 
@@ -46,7 +46,7 @@ class MainWindow(Frame):
         label_vector = Label(self, text="Vector de inicialización:")
         label_vector.grid(row=1, column=0, padx=10, pady=10, sticky="w")
 
-        entry_vector = Entry(self, width=35, textvariable=self.vector)
+        entry_vector = Entry(self, width=35, textvariable=self.init_vector)
         entry_vector.grid(row=1, column=1, padx=10, pady=10)
 
         label_crc_type = Label(self, text="Tipo de CRC:")
@@ -84,18 +84,18 @@ class MainWindow(Frame):
         """Calcula el CRC y muestra los resultados."""
         string_var = self.string_var.get()
         crc_type = self.crc_type.get()
-        vector = self.vector.get()
+        init_vector = self.init_vector.get()
 
         # TODO: Aquí se implementa la lógica para calcular el CRC de acuerdo a
         # los parámetros ingresados. Esto debe ser implementado en otro modulo
         # de Python. Una vez completado hay que borrar este bloque TODO: FIN del bloque
         # Invocación de la lógica.
-        crc_result, encoded_result = calculate_crc(string_var, crc_type, vector)
+        crc_result, encoded_result = calculate_crc(string_var, crc_type, init_vector)
         
         # # DEBUG:
         # print(string_var)
         # print(crc_type)
-        # print(vector)
+        # print(init_vector)
         # print(crc_result, encoded_result)
         # # DEBUG: FIN del bloque
 
