@@ -24,6 +24,7 @@ def main():
     Crea la ventana princial.
     """
     root = Tk()
+    root.title("Calculadora CRC")
     app = MainWindow(root)
     root.mainloop()
 
