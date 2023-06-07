@@ -12,4 +12,4 @@ def detect_errors (info_hex, polynomial, init_vector):
     # DEBUG:
     print(info_hex, polynomial, init_vector)
     print("Hola_mundo")
-    return ("Hola mundo")
+    return "Hola mundo"
