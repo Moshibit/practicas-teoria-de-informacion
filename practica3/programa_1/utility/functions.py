@@ -2,7 +2,7 @@
 Módulo que contiene funciones útiles para el proyecto.
 """
 
-def calculate_crc(string, crc_type, vector):
+def calculate_crc(text, crc_type, vector):
     """
     calcula el CRC decuardo a los parametros enviados.
     """
@@ -10,6 +10,6 @@ def calculate_crc(string, crc_type, vector):
     # ...
 
     # DEBUG:
-    print(string, crc_type, vector)
+    print(text, crc_type, vector)
     print("Hola_mundo")
     return ("Hola", "mundo")

@@ -22,7 +22,7 @@ class MainWindow(Frame):
         """
         super().__init__(master)
         self.master = master
-        self.string_var = StringVar()
+        self.text = StringVar()
         self.crc_type = StringVar()
         self.init_vector = StringVar()
         self.pack()
@@ -37,7 +37,7 @@ class MainWindow(Frame):
 
         entry_string = Entry(self,
             width=35,
-            textvariable=self.string_var,
+            textvariable=self.text,
             validate="key",
             validatecommand=(self.register(self.validate_text), "%P"),
             )
@@ -82,7 +82,7 @@ class MainWindow(Frame):
 
     def calculate_crc(self) -> None:
         """Calcula el CRC y muestra los resultados."""
-        string_var = self.string_var.get()
+        text = self.text.get()
         crc_type = self.crc_type.get()
         init_vector = self.init_vector.get()
 
@@ -90,7 +90,7 @@ class MainWindow(Frame):
         # los parámetros ingresados. Esto debe ser implementado en otro modulo
         # de Python. Una vez completado hay que borrar este bloque TODO: FIN del bloque
         # Invocación de la lógica.
-        crc_result, encoded_result = calculate_crc(string_var, crc_type, init_vector)
+        crc_result, encoded_result = calculate_crc(text, crc_type, init_vector)
         
         # # DEBUG:
         # print(string_var)
