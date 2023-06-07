@@ -14,4 +14,4 @@ def calculate_crc(text, crc_type, vector):
     # print("Hola_mundo")
     # # DEBUG: Fin
 
-    return "Hola mundo" # TODO cambiar por el verdadero retorno
+    return "Hola mundo" # TODO: cambiar por el verdadero retorno
