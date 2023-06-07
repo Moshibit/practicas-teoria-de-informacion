@@ -82,22 +82,22 @@ class MainWindow(Frame):
 
     def calculate_crc(self) -> None:
         """Calcula el CRC y muestra los resultados."""
-        # TODO: corregir esta parte.
-        # self.string_var = self.entry_string.get()
-        # self.crc_type = self.entry_crc_type.get()
-        # self.vector = self.entry_vector.get()
-
-        # DEBUG:
-        print(self.string_var)
-        print(self.crc_type)
-        print(self.vector)
+        string_var = self.string_var.get()
+        crc_type = self.crc_type.get()
+        vector = self.vector.get()
 
         # TODO: Aquí se implementa la lógica para calcular el CRC de acuerdo a
         # los parámetros ingresados. Esto debe ser implementado en otro modulo
         # de Python. Una vez completado hay que borrar este bloque TODO: FIN del bloque
-        # Invocación de la lógica de negocio.
-        crc_result, encoded_result = calculate_crc(self.string_var, self.crc_type, self.vector)
-        print(crc_result, encoded_result) # DEBUG: <--
+        # Invocación de la lógica.
+        crc_result, encoded_result = calculate_crc(string_var, crc_type, vector)
+        
+        # # DEBUG:
+        # print(string_var)
+        # print(crc_type)
+        # print(vector)
+        # print(crc_result, encoded_result)
+        # # DEBUG: FIN del bloque
 
         # Mostrar los resultados
         self.label_result_crc.config(text="CRC calculado: " + crc_result)
