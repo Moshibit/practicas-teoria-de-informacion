@@ -14,4 +14,4 @@ def detect_errors (info_hex, polynomial, init_vector):
     # print("Hola_mundo")
     # # DEBUG: Fin
 
-    return "Hola mundo" # TODO cambiar por el verdadero retorno
+    return "Hola mundo" # TODO: cambiar por el verdadero retorno
