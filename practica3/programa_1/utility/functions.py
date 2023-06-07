@@ -1,6 +1,5 @@
 """
 Módulo que contiene funciones útiles para el proyecto.
-Aquí puedes agregar más funciones según sea necesario.
 """
 
 def calculate_crc(string, crc_type, vector):
