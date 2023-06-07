@@ -1,26 +1,35 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 """
-Título: Práctica 3 - Códigos de redundancia cíclica.
-Descripción: 
+Archivo principal del proyecto.
+Inicia la aplicación y crea la ventana principal
+
 Entrada: 
 Salida: 
-Autores: 
-Fecha de creación: 05/06/2023
-Última fecha de edición: 
+Fecha de creación: 06/06/2023
+Última fecha de edición: 06/06/2023
 
 """
 
-# FUNCIÓN MAIN DEL PROYECTO
-# -------------------------
+# Bibliotecas
+# -----------
+from tkinter import Tk
+from gui.main_window import MainWindow
 
+
+# Funcion main
+# ------------
 def main():
-    """ Main """
-    print("Start")
-
-    # TODO: agregar la lógica
-
-    print("End")
+    """
+    Crea la ventana princial.
+    """
+    root = Tk()
+    root.title("Detección de errores CRC")
+    app = MainWindow(root)
+    root.mainloop()
 
 if __name__ == "__main__":
+    print("Start.")
+    # Invoca la función main
     main()
+    print("End.")
