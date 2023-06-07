@@ -4,12 +4,14 @@ Módulo que contiene funciones útiles para el proyecto.
 
 def detect_errors (info_hex, polynomial, init_vector):
     """
-    calcula el CRC decuardo a los parametros enviados.
+    Detecta errores decuardo a los parametros enviados.
     """
-    # Código para calcular CRC
+    # Código para detectar errores
     # ...
 
-    # DEBUG:
-    print(info_hex, polynomial, init_vector)
-    print("Hola_mundo")
-    return "Hola mundo"
+    # # DEBUG:
+    # print(info_hex, polynomial, init_vector)
+    # print("Hola_mundo")
+    # # DEBUG: Fin
+
+    return "Hola mundo" # TODO cambiar por el verdadero retorno
