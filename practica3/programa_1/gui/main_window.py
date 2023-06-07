@@ -2,6 +2,7 @@
 Múdlo que define la clase MainWindow que representa la ventana principal de la
 aplicación.
 """
+import string
 
 from tkinter import Frame, Button, Label, Entry, StringVar, Tk
 from tkinter.ttk import Combobox
@@ -34,21 +35,31 @@ class MainWindow(Frame):
         label_string = Label(self, text="Cadena de texto(32 caracteres ASCII):")
         label_string.grid(row=0, column=0, padx=10, pady=10, sticky="w")
 
-        entry_string = Entry(self, width=30, textvariable=self.string_var)
+        entry_string = Entry(self,
+            width=35,
+            textvariable=self.string_var,
+            validate="key",
+            validatecommand=(self.register(self.validate_text), "%P"),
+            )
         entry_string.grid(row=0, column=1, padx=10, pady=10)
 
+        label_vector = Label(self, text="Vector de inicialización:")
+        label_vector.grid(row=1, column=0, padx=10, pady=10, sticky="w")
+
+        entry_vector = Entry(self, width=35, textvariable=self.vector)
+        entry_vector.grid(row=1, column=1, padx=10, pady=10)
+
         label_crc_type = Label(self, text="Tipo de CRC:")
-        label_crc_type.grid(row=1, column=0, padx=10, pady=10, sticky="w")
+        label_crc_type.grid(row=2, column=0, padx=10, pady=10, sticky="w")
 
-        combobox_crc_type = Combobox(self, values=["CRC-8", "CRC-32"], textvariable=self.crc_type)
+        combobox_crc_type = Combobox(self,
+            width=8,
+            state="readonly",
+            values=["CRC-8", "CRC-32"],
+            textvariable=self.crc_type,
+            )
         combobox_crc_type.current(0)  # Establecer el valor predeterminado
-        combobox_crc_type.grid(row=1, column=1, padx=10, pady=10, sticky="w")
-
-        label_vector = Label(self, text="vector de inicialización:")
-        label_vector.grid(row=2, column=0, padx=10, pady=10, sticky="w")
-
-        entry_vector = Entry(self, width=30, textvariable=self.vector)
-        entry_vector.grid(row=2, column=1, padx=10, pady=10)
+        combobox_crc_type.grid(row=2, column=1, padx=10, pady=10, sticky="w")
 
         button_calculate = Button(self, text="Calcular CRC", command=self.calculate_crc)
         button_calculate.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
@@ -58,6 +69,16 @@ class MainWindow(Frame):
 
         self.label_result_encoded = Label(self, text="Mensaje codificado:")
         self.label_result_encoded.grid(row=5, column=0, padx=10, pady=10, sticky="w")
+
+    def validate_text(self, input_text: str) -> bool:
+        """Valida el texto de entrada para limitarlo a 32 caracteres ASCII"""
+        if len(input_text) > 32:
+            return False
+
+        if any(char not in string.printable for char in input_text):
+            return False
+
+        return True
 
     def calculate_crc(self) -> None:
         """Calcula el CRC y muestra los resultados."""
