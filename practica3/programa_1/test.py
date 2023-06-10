@@ -14,13 +14,15 @@ def crc_encode(g, c, d):
     for b in d:
         p = c[0] ^ b
         for i in range(0, len(c) - 1):
-            # print(c[i], " = ", c[i+1], " ^ (" , p, " & ", g[i+1], " )" )
+            #print(i, " | ", c[i+1], " ^ (" , p, " & ", g[i+1], " ) = ", end=" ")
             c[i] = c[i+1] ^ (p & g[i+1])
+            #print(c[i])
+        #print("z"," | ", c[-1], " <== " , p, " = ", end=" ")
         c[-1] = p
-        print(b, p, c[::-1])
+        #print(c[-1])
+        print(b, p, c)
 
     print("-"*40)
-    c = c[::-1]
     print(c)
     return d + c
 
@@ -35,10 +37,13 @@ def crc_decode(g, c, m):
     for b in m:
         p = c[0] ^ b
         for i in range(0, len(c) - 1):
-            # print(c[i], " = ", c[i+1], " ^ (" , p, " & ", g[i+1], " )" )
+            #print(i, " | ", c[i+1], " ^ (" , p, " & ", g[i+1], " ) = ", end=" ")
             c[i] = c[i+1] ^ (p & g[i+1])
+            #print(c[i])
+        #print("z"," | ", c[-1], " <== " , p, " = ", end=" ")
         c[-1] = p
-        print(b, p, c[::-1])
+        #print(c[-1])
+        print(b, p, c)
 
     print("-"*40)
     print(c)
