@@ -2,6 +2,7 @@
 Múdlo que define la clase MainWindow que representa la ventana principal de la
 aplicación.
 """
+import re
 import string
 
 from tkinter import Frame, Button, Label, Entry, StringVar, Tk
@@ -43,14 +44,8 @@ class MainWindow(Frame):
             )
         entry_string.grid(row=0, column=1, padx=10, pady=10)
 
-        label_vector = Label(self, text="Vector de inicialización:")
-        label_vector.grid(row=1, column=0, padx=10, pady=10, sticky="w")
-
-        entry_vector = Entry(self, width=35, textvariable=self.init_vector)
-        entry_vector.grid(row=1, column=1, padx=10, pady=10)
-
         label_crc_type = Label(self, text="Tipo de CRC:")
-        label_crc_type.grid(row=2, column=0, padx=10, pady=10, sticky="w")
+        label_crc_type.grid(row=1, column=0, padx=10, pady=10, sticky="w")
 
         combobox_crc_type = Combobox(self,
             width=8,
@@ -59,7 +54,20 @@ class MainWindow(Frame):
             textvariable=self.crc_type,
             )
         combobox_crc_type.current(0)  # Establecer el valor predeterminado
-        combobox_crc_type.grid(row=2, column=1, padx=10, pady=10, sticky="w")
+        combobox_crc_type.grid(row=1, column=1, padx=10, pady=10, sticky="w")
+        combobox_crc_type.bind("<<ComboboxSelected>>", self.update_init_vector)
+
+        label_init_vector = Label(self, text="Vector de inicialización:")
+        label_init_vector.grid(row=2, column=0, padx=10, pady=10, sticky="w")
+
+        entry_init_vector = Entry(self,
+            width=35,
+            text = "00000000",
+            textvariable=self.init_vector,
+            validate="key",
+            validatecommand=(self.register(self.validate_init_vector), "%P"),
+            )
+        entry_init_vector.grid(row=2, column=1, padx=10, pady=10)
 
         button_calculate = Button(self, text="Calcular CRC", command=self.calculate_crc)
         button_calculate.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
@@ -70,6 +78,9 @@ class MainWindow(Frame):
         self.label_result_encoded = Label(self, text="Mensaje codificado:")
         self.label_result_encoded.grid(row=5, column=0, padx=10, pady=10, sticky="w")
 
+        # Establecer el valor por defecto del campo de vector de inicialización
+        self.update_init_vector()
+
     def validate_text(self, input_text: str) -> bool:
         """Valida el texto de entrada para limitarlo a 32 caracteres ASCII"""
         if len(input_text) > 32:
@@ -79,6 +90,37 @@ class MainWindow(Frame):
             return False
 
         return True
+
+
+    def validate_init_vector(self, new_value: str) -> bool:
+        """Valida el vector de inicialización"""
+        crc_type = self.crc_type.get()
+        init_vector = new_value
+
+        if crc_type == "CRC-8":
+            max_length = 8
+        elif crc_type == "CRC-32":
+            max_length = 32
+        # else:
+        #     return False
+
+        # Verificar que el vector de inicialización tenga solo 1s y 0s
+        if re.match(r"^[01]*$", init_vector):
+            # Verificar que el vector de inicialización no exceda la longitud máxima
+            if len(init_vector) <= max_length:
+                return True
+
+        return False
+
+
+    def update_init_vector(self, event=None) -> None:
+        """Actualiza el valor por defecto del campo de vector de inicialización"""
+        crc_type = self.crc_type.get()
+        if crc_type == "CRC-8":
+            self.init_vector.set("0"*8)
+        elif crc_type == "CRC-32":
+            self.init_vector.set("0"*32)
+
 
     def calculate_crc(self) -> None:
         """Calcula el CRC y muestra los resultados."""
