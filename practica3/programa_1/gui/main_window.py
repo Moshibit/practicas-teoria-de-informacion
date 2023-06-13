@@ -134,9 +134,6 @@ class MainWindow(Frame):
         if result:
             self.clipboard_clear()
             self.clipboard_append(result)
-            #messagebox.showinfo('Copied', 'Result copied to clipboard!')
-        #else:
-            #messagebox.showwarning('No Result', 'No result to copy!')
 
 
     def calculate_crc(self) -> None:
