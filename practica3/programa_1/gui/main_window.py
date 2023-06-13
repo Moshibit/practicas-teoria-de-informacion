@@ -26,8 +26,10 @@ class MainWindow(Frame):
         self.text = StringVar()
         self.crc_type = StringVar()
         self.init_vector = StringVar()
+        self.encode_message = ""
         self.pack()
         self.create_widgets()
+  
 
     def create_widgets(self) -> None:
         """
@@ -78,6 +80,12 @@ class MainWindow(Frame):
         self.label_result_encoded = Label(self, text="Mensaje codificado:")
         self.label_result_encoded.grid(row=5, column=0, padx=10, pady=10, sticky="w")
 
+        button_copy = Button(self,
+            text="Copiar Mensaje codificado",
+            command=self.copy_to_clipboard,
+            )
+        button_copy.grid(row=6, columnspan=2, padx=10, pady=10)
+
         # Establecer el valor por defecto del campo de vector de inicialización
         self.update_init_vector()
 
@@ -101,12 +109,10 @@ class MainWindow(Frame):
             max_length = 8
         elif crc_type == "CRC-32":
             max_length = 32
-        # else:
-        #     return False
 
-        # Verificar que el vector de inicialización tenga solo 1s y 0s
+        # Verifica que el vector de inicialización tenga solo 1s y 0s
         if re.match(r"^[01]*$", init_vector):
-            # Verificar que el vector de inicialización no exceda la longitud máxima
+            # Verifica que el vector de inicialización no exceda la longitud máxima
             if len(init_vector) <= max_length:
                 return True
 
@@ -122,6 +128,17 @@ class MainWindow(Frame):
             self.init_vector.set("0"*32)
 
 
+    def copy_to_clipboard(self):
+        """Copia el resultado final al portapapeles"""
+        result = self.encode_message#
+        if result:
+            self.clipboard_clear()
+            self.clipboard_append(result)
+            #messagebox.showinfo('Copied', 'Result copied to clipboard!')
+        #else:
+            #messagebox.showwarning('No Result', 'No result to copy!')
+
+
     def calculate_crc(self) -> None:
         """Calcula el CRC y muestra los resultados."""
         text = self.text.get()
@@ -133,7 +150,8 @@ class MainWindow(Frame):
         # de Python. Una vez completado hay que borrar este bloque TODO: FIN del bloque
         # Invocación de la lógica.
         crc_result, encoded_result = calculate_crc(text, crc_type, init_vector)
-        
+        self.encode_message = encoded_result
+
         # # DEBUG:
         # print(string_var)
         # print(crc_type)
